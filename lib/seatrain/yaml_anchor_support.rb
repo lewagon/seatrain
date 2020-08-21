@@ -75,4 +75,19 @@ module YamlAnchorSupport
       super
     end
   end
+
+  protected
+
+  def rewrite_yaml(yaml)
+    builder = MyYAMLTree.create
+    builder << yaml
+    tree = builder.tree
+    File.write(@path, tree.yaml, mode: "wb")
+  end
+
+  def load_yaml
+    str = File.open(@path).read
+    tree = Psych.parse(str)
+    ToRubyNoMerge.create.accept(tree)
+  end
 end
