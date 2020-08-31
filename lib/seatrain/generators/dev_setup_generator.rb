@@ -30,7 +30,7 @@ module Seatrain
       default: ENV.fetch("SEATRAIN_DIPYML_URI", SEATRAIN_DIPYML_URI)
 
     def welcome
-      say "\t🚃 SEATRAIN LOCAL DOCKER ENVIRONMENT #{behavior == :invoke ? "SETUP" : "CLEANUP"} 🌊", :green
+      say "\t🚃 SEATRAIN LOCAL DOCKER ENVIRONMENT #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
     end
 
     def place_dockerfile_dev
@@ -49,14 +49,14 @@ module Seatrain
       docker_compose = URI.open(options[:docker_compose_uri]).read
       create_file path, docker_compose
 
-      if behavior == :invoke
+      if invoke?
         @dc_transformer = YamlTransformer.new(path)
-        @dc_transformer.deep_replace_key("image", app_name, DUMMY_IMAGE_NAME)
+        @dc_transformer.deep_replace_key("image", DUMMY_IMAGE_NAME, app_name + ":dev")
       end
     end
 
     def decide_on_sidekiq
-      return if behavior == :revoke
+      return if revoke?
 
       unless yes?("Are you using Sidekiq?")
         @dc_transformer.deep_delete_key("sidekiq")
@@ -65,7 +65,7 @@ module Seatrain
     end
 
     def decide_on_webpacker
-      return if behavior == :revoke
+      return if revoke?
 
       unless yes?("Are you using webpacker? (Do you need a webpack-dev-server service?)")
         @dc_transformer.deep_delete_key("webpacker")
@@ -78,7 +78,7 @@ module Seatrain
       dip_yml = URI.open(options[:dip_yml_uri]).read
       create_file path, dip_yml
 
-      if behavior == :invoke
+      if invoke?
         @dip_transfomer = YamlTransformer.new(path)
         @dip_transfomer.deep_delete_key("sidekiq") unless @dc_transformer.dig("services", "sidekiq")
         @dip_transfomer.deep_delete_key("webpacker") unless @dc_transformer.dig("services", "webpacker")
@@ -91,13 +91,11 @@ module Seatrain
           \n  url: <%= ENV.fetch("DATABASE_URL", " ") %>
         YAML
       end
-      if behavior == :invoke
-        say_status :info, '👌 url: <%= ENV.fetch("DATABASE_URL", " ") injected into config/database.yml'
-      end
+      say_status :info, '👌 url: <%= ENV.fetch("DATABASE_URL", " ") injected into config/database.yml' if invoke?
     end
 
     def summarize
-      return if behavior == :revoke
+      return if revoke?
       say "\nAll set, you can run your app in containers locally now! 📦"
 
       services = @dc_transformer["services"]&.keys&.join(", ")
@@ -108,6 +106,14 @@ module Seatrain
     end
 
     private
+
+    def revoke?
+      behavior == :revoke
+    end
+
+    def invoke?
+      behavior == :invoke
+    end
 
     def app_name
       Rails.application.class.parent_name.parameterize.dasherize
