@@ -1,10 +1,14 @@
 require "open-uri"
+require "ipaddr"
 require_relative "../yaml_transformer"
 require_relative "../helm"
 require_relative "../kubectl"
 
 module Seatrain
   class ProdSetupGenerator < Rails::Generators::Base
+    NGINX_RETRIES = 18
+    NGINX_RETRY_INTERVAL = 30
+
     namespace "seatrain:setup:prod"
 
     class_option :dockerfile_prod_uri,
@@ -32,11 +36,15 @@ module Seatrain
       @kubectl = Kubectl.new
     end
 
+    def check_helm_version
+      # TODO
+    end
+
     def warn_context
       return if revoke?
       ctx = @kubectl.current_context
-      say_status :info, "Your Kubernetes context is set to #{ctx}"
-      unless yes? "Is this a cluster where you plan to deploy? 👆"
+      say_status :info, "Your Kubernetes context is set to \e[1m#{ctx}\e[22m"
+      unless yes? "\tIs this a cluster where you plan to deploy? 👆"
         say "Make sure to select the correct Kubernetes context and re-run this generator", :yellow
         exit 0
       end
@@ -44,16 +52,52 @@ module Seatrain
 
     # WIP
     def install_nginx_ingress
-      name = namespace = "nginx-ingress"
       return if revoke?
+      name = namespace = "nginx-ingress"
+
       if @helm.release_exists?(namespace, name)
         say_status :info, "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
         return
       end
-      @kubectl.create_namespace(name)
-    rescue NamespaceAlreadyExistsError
-      # @helm.install ....
+
+      unless @kubectl.namespace_exists?(name)
+        say_status :info, "[KUBECTL] Creating nginx-ingress namespace..."
+        @kubectl.create_namespace(name)
+      end
+
+      out = @helm.add_repo(
+        "nginx-stable",
+        "https://helm.nginx.com/stable"
+      )
+      say_status :info, "[HELM] #{out}"
+      say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
+
+      say_status :info, "Installing NGINX Ingress Controller"
+      out = @helm.install(name, "nginx-stable/nginx-ingress", namespace)
+      say_status :info, "[HELM] #{out}"
+      say_status :info, "Waiting for LoadBalancer to become available..."
+
+      success = ip = nil
+      begin
+        NGINX_RETRIES.times do |i|
+          out = @kubectl.get_load_balancer_ip
+          ip = IPAddr.new(out)
+          success = true
+        rescue IPAddr::InvalidAddressError
+          say_status :info, "Attempt #{i + 1}/#{NGINX_RETRIES} ☕️ Retrying in #{NGINX_RETRY_INTERVAL} seconds..."
+          sleep(NGINX_RETRY_INTERVAL)
+          next
+        end
+      end
+
+      if success
+        say_status :info, "[KUBECTL] 🎉  Load balancer created, ip #{ip}"
+      else
+        say_status :error, "Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard", :red
+      end
     end
+
+    # TODO: Patch nginx-ingress service for Local/Cluster (DO specific bug)
 
     private
 

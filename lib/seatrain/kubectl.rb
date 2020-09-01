@@ -12,6 +12,34 @@ module Seatrain
       end
     end
 
+    def get_load_balancer_ip
+      _, out = shell(
+        "kubectl",
+        "get",
+        "service",
+        "--namespace=nginx-ingress",
+        "nginx-ingress-nginx-ingress",
+        "--template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'"
+      )
+      out.tr("'", "") # otherwise IP addr is single-quoted
+    end
+
+    def namespace_exists?(name)
+      ok, out = shell(
+        "kubectl",
+        "get",
+        "namespace",
+        name
+      )
+      unless ok
+        return false if out.match?(/NotFound/)
+        puts "Could not get namespace in the cluster, reason:"
+        puts out
+        exit 1
+      end
+      out.match?(/#{name}/)
+    end
+
     def create_namespace(name)
       ok, out = shell(
         "kubectl",
@@ -20,12 +48,10 @@ module Seatrain
         name
       )
       unless ok
-        raise NamespaceAlreadyExistsError if out.match?(/AlreadyExists/)
         puts "Could not create namespace in the cluster, reason:"
         puts out
         exit 1
       end
-      out.match?(/created/)
     end
 
     def current_context

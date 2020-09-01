@@ -12,6 +12,53 @@ module Seatrain
       end
     end
 
+    def install(release_name, chart_name, namespace)
+      ok, out = shell(
+        "helm",
+        "install",
+        release_name,
+        chart_name,
+        "--namespace",
+        namespace
+      )
+      unless ok
+        puts "`helm install` failed, reason: "
+        puts out
+        exit 1
+      end
+      out
+    end
+
+    def add_repo(name, url)
+      ok, out = shell(
+        "helm",
+        "repo",
+        "add",
+        name,
+        url
+      )
+      unless ok
+        puts "`helm repo add` failed, reason: "
+        puts out
+        exit 1
+      end
+      out
+    end
+
+    def update_repo
+      ok, out = shell(
+        "helm",
+        "repo",
+        "update"
+      )
+      unless ok
+        puts "`helm repo update` failed, reason: "
+        puts out
+        exit 1
+      end
+      ok
+    end
+
     def release_exists?(namespace, release)
       ok, out = shell(
         "helm",
