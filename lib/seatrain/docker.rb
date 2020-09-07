@@ -22,8 +22,6 @@ module Seatrain
         "-f",
         Rails.root.join(".seatrain", "Dockerfile.prod").to_s,
         "--build-arg",
-        "RUBY_VERSION=2.6.6",
-        "--build-arg",
         "PG_MAJOR=12",
         "--build-arg",
         "NODE_MAJOR=12",
@@ -32,6 +30,8 @@ module Seatrain
         "--build-arg",
         "BUNDLER_VERSION=2.1.4",
         Rails.root.to_s,
+        "--build-arg",
+        "RUBY_VERSION=2.6.6",
         "-t",
         "#{image}:#{tag}",
         {chdir: Rails.root.to_s}
