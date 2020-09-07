@@ -12,6 +12,25 @@ module Seatrain
       end
     end
 
+    # Digital Ocean specific
+    def patch_do_load_balancer
+      ok, out = shell(
+        "kubectl",
+        "patch",
+        "services",
+        "nginx-ingress-nginx-ingress",
+        "--namespace",
+        "nginx-ingress",
+        "-p",
+        '{"spec":{"externalTrafficPolicy":"Cluster"}}'
+      )
+      unless ok
+        puts "Could not patch load balancer, reason:"
+        puts out
+        exit 1
+      end
+    end
+
     def get_load_balancer_ip
       _, out = shell(
         "kubectl",

@@ -5,22 +5,25 @@ module Seatrain
   class DevSetupGenerator < Rails::Generators::Base
     namespace "seatrain:setup:dev"
 
+    # TODO: move defaults to config?
     class_option :dockerfile_dev_uri,
       type: :string,
       desc: "URI for the development Dockerfile",
-      # Move to config
       default: ENV.fetch("SEATRAIN_DOCKERDEV_URI", SEATRAIN_DOCKERDEV_URI)
+
+    class_option :dockerfile_prod_uri,
+      type: :string,
+      desc: "URI for the production Dockerfile",
+      default: ENV.fetch("SEATRAIN_DOCKERPROD_URI", SEATRAIN_DOCKERPROD_URI)
 
     class_option :docker_compose_uri,
       type: :string,
       desc: "URI for the development docker-compose.yml",
-      # Move to config
       default: ENV.fetch("SEATRAIN_DOCKECOMPOSE_URI", SEATRAIN_DOCKERCOMPOSE_URI)
 
     class_option :dip_yml_uri,
       type: :string,
       desc: "URI for the development dip.yml",
-      # Move to config
       default: ENV.fetch("SEATRAIN_DIPYML_URI", SEATRAIN_DIPYML_URI)
 
     def welcome
@@ -30,6 +33,11 @@ module Seatrain
     def place_dockerfile_dev
       dockerfile = URI.open(options[:dockerfile_dev_uri]).read
       create_file ".seatrain/Dockerfile.dev", dockerfile
+    end
+
+    def place_dockerfile_prod
+      dockerfile = URI.open(options[:dockerfile_prod_uri]).read
+      create_file ".seatrain/Dockerfile.prod", dockerfile
     end
 
     def place_aptfile
@@ -110,7 +118,7 @@ module Seatrain
     end
 
     def app_name
-      Rails.application.class.parent_name.parameterize.dasherize
+      Rails.application.class.module_parent_name.parameterize.dasherize
     end
   end
 end

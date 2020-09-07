@@ -12,14 +12,15 @@ module Seatrain
       end
     end
 
-    def install(release_name, chart_name, namespace)
+    def install(release_name, chart_name, namespace, *extra)
       ok, out = shell(
         "helm",
         "install",
         release_name,
         chart_name,
         "--namespace",
-        namespace
+        namespace,
+        *extra
       )
       unless ok
         puts "`helm install` failed, reason: "

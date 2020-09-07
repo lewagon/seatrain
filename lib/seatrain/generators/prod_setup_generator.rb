@@ -11,23 +11,12 @@ module Seatrain
 
     namespace "seatrain:setup:prod"
 
-    class_option :dockerfile_prod_uri,
-      type: :string,
-      desc: "URI for the production Dockerfile",
-      # Move to config
-      default: ENV.fetch("SEATRAIN_DOCKERPROD_URI", SEATRAIN_DOCKERPROD_URI)
-
+    # TODO: Make sure destroy does something.
     def welcome
       say "\t🚃 SEATRAIN PRODUCTION ENVIRONMENT #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
 
       say "\t⚠️  helm and kubectl executables need to be installed and available in $PATH for generator to continue"
     end
-
-    # TODO
-    # def place_dockerfile_prod
-    #   dockerfile = URI.open(options[:dockerfile_prod_uri]).read
-    #   create_file ".seatrain/Dockerfile.prod", dockerfile
-    # end
 
     def check_tools
       return if revoke?
@@ -37,7 +26,7 @@ module Seatrain
     end
 
     def check_helm_version
-      # TODO
+      # TODO Must be version 3, or else...
     end
 
     def warn_context
@@ -61,7 +50,7 @@ module Seatrain
       end
 
       unless @kubectl.namespace_exists?(name)
-        say_status :info, "[KUBECTL] Creating nginx-ingress namespace..."
+        say_status :info, "[KUBECTL] Creating #{name} namespace..."
         @kubectl.create_namespace(name)
       end
 
@@ -72,10 +61,10 @@ module Seatrain
       say_status :info, "[HELM] #{out}"
       say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
 
-      say_status :info, "Installing NGINX Ingress Controller"
-      out = @helm.install(name, "nginx-stable/nginx-ingress", namespace)
-      say_status :info, "[HELM] #{out}"
-      say_status :info, "Waiting for LoadBalancer to become available..."
+      say_status :info, "[HELM] Installing NGINX Ingress Controller"
+      @helm.install(name, "nginx-stable/nginx-ingress", namespace)
+      say_status :info, "[HELM]  🎉  NGINX Ingress Controller installed"
+      say_status :info, "[KUBECTL] Waiting for LoadBalancer to become available..."
 
       success = ip = nil
       begin
@@ -91,13 +80,52 @@ module Seatrain
       end
 
       if success
-        say_status :info, "[KUBECTL] 🎉  Load balancer created, ip #{ip}"
+        say_status :info, "[KUBECTL]  🎉  Load balancer created, public IP: #{ip}"
       else
-        say_status :error, "Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard", :red
+        say_status :error, "[KUBECTL] Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard", :red
       end
     end
 
-    # TODO: Patch nginx-ingress service for Local/Cluster (DO specific bug)
+    # Patch nginx-ingress service in Digital Ocean
+    def patch_do_load_balancer
+      say_status :info, "[KUBECTL] Patching externalTrafficPolicy from Local to Cluster"
+      @kubectl.patch_do_load_balancer
+      say_status :info, "[KUBECTL] 🎉  Success!"
+    end
+
+    def install_certmanager
+      return if revoke?
+      name = namespace = "cert-manager"
+
+      if @helm.release_exists?(namespace, name)
+        say_status :info, "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
+        return
+      end
+
+      unless @kubectl.namespace_exists?(name)
+        say_status :info, "[KUBECTL] Creating #{name} namespace..."
+        @kubectl.create_namespace(name)
+      end
+
+      out = @helm.add_repo(
+        "jetstack",
+        "https://charts.jetstack.io"
+      )
+      say_status :info, "[HELM] #{out}"
+      say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
+
+      say_status :info, "[HELM] Installing cert-manager..."
+      @helm.install(
+        name,
+        "jetstack/cert-manager",
+        namespace,
+        "--version",
+        "v0.16.1",
+        "--set",
+        "installCRDs=true"
+      )
+      say_status :info, "[HELM]  🎉  cert-manager installed"
+    end
 
     private
 
