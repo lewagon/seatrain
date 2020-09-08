@@ -24,7 +24,7 @@ module Seatrain
       rewrite_yaml(@obj)
     end
 
-    def deep_replace_first_key(key_name, new_value)
+    def deep_replace_unique_key(key_name, new_value)
       return unless File.exist?(@path)
       @obj.deep_locate ->(k, v, o) { o[key_name] = new_value if k == key_name }
       rewrite_yaml(@obj)
