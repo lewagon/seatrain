@@ -53,14 +53,19 @@ module Seatrain
 
       if invoke?
         @dc_transformer = YamlTransformer.new(path)
-        @dc_transformer.deep_replace_key("image", DUMMY_IMAGE_NAME, app_name + ":dev")
+        @dc_transformer.deep_replace_key("image", DUMMY_IMAGE_NAME, Seatrain::Config.new.image_name + ":dev")
+        @dc_transformer.deep_replace_unique_key("RUBY_VERSION", Seatrain::Config.new.ruby_version)
+        @dc_transformer.deep_replace_unique_key("PG_MAJOR", Seatrain::Config.new.pg_version)
+        @dc_transformer.deep_replace_unique_key("NODE_MAJOR", Seatrain::Config.new.node_version)
+        @dc_transformer.deep_replace_unique_key("YARN_VERSION", Seatrain::Config.new.yarn_version)
+        @dc_transformer.deep_replace_unique_key("BUNDLER_VERSION", Seatrain::Config.new.bundler_version)
       end
     end
 
     def decide_on_sidekiq
       return if revoke?
 
-      unless yes?("Are you using Sidekiq?")
+      unless Seatrain::Config.new.use_sidekiq?
         @dc_transformer.deep_delete_key("sidekiq")
         say_status :info, "👌 sidekiq service removed from docker-compose file", :red
       end
@@ -69,7 +74,7 @@ module Seatrain
     def decide_on_webpacker
       return if revoke?
 
-      unless yes?("Are you using webpacker? (Do you need a webpack-dev-server service?)")
+      unless Seatrain::Config.new.use_webpacker?
         @dc_transformer.deep_delete_key("webpacker")
         say_status :info, "👌 webpacker service removed from docker-compose file", :red
       end
@@ -115,10 +120,6 @@ module Seatrain
 
     def invoke?
       behavior == :invoke
-    end
-
-    def app_name
-      Rails.application.class.module_parent_name.parameterize.dasherize
     end
   end
 end
