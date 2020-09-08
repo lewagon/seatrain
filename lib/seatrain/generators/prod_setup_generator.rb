@@ -42,27 +42,28 @@ module Seatrain
     # WIP
     def install_nginx_ingress
       return if revoke?
-      name = namespace = "nginx-ingress"
+      name = "nginx-ingress"
+      namespace = "ingress-nginx"
 
       if @helm.release_exists?(namespace, name)
         say_status :info, "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
         return
       end
 
-      unless @kubectl.namespace_exists?(name)
-        say_status :info, "[KUBECTL] Creating #{name} namespace..."
-        @kubectl.create_namespace(name)
+      unless @kubectl.namespace_exists?(namespace)
+        say_status :info, "[KUBECTL] Creating #{namespace} namespace..."
+        @kubectl.create_namespace(namespace)
       end
 
       out = @helm.add_repo(
-        "nginx-stable",
-        "https://helm.nginx.com/stable"
+        "ingress-nginx",
+        "https://kubernetes.github.io/ingress-nginx"
       )
       say_status :info, "[HELM] #{out}"
       say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
 
       say_status :info, "[HELM] Installing NGINX Ingress Controller"
-      @helm.install(name, "nginx-stable/nginx-ingress", namespace)
+      @helm.install(name, "ingress-nginx/ingress-nginx ", namespace)
       say_status :info, "[HELM]  🎉  NGINX Ingress Controller installed"
       say_status :info, "[KUBECTL] Waiting for LoadBalancer to become available..."
 
