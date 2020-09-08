@@ -12,29 +12,40 @@ module Seatrain
       end
     end
 
-    # TODO: Take versions from config
     def build(image, tag)
-      # TODO: read build-args dynamically from Dockerfile?
       ok = shell_stream(
         {"DOCKER_BUILDKIT" => "1"},
         "docker",
         "build",
         "-f",
         Rails.root.join(".seatrain", "Dockerfile.prod").to_s,
-        "--build-arg",
-        "PG_MAJOR=12",
-        "--build-arg",
-        "NODE_MAJOR=12",
-        "--build-arg",
-        "YARN_VERSION=1.22.4",
-        "--build-arg",
-        "BUNDLER_VERSION=2.1.4",
         Rails.root.to_s,
-        "--build-arg",
-        "RUBY_VERSION=2.6.6",
         "-t",
         "#{image}:#{tag}",
+        "--build-arg",
+        "RUBY_VERSION=#{Seatrain::Config.new.ruby_version}",
+        "--build-arg",
+        "PG_MAJOR=#{Seatrain::Config.new.pg_version}",
+        "--build-arg",
+        "NODE_MAJOR=#{Seatrain::Config.new.node_version}",
+        "--build-arg",
+        "YARN_VERSION=#{Seatrain::Config.new.yarn_version}",
+        "--build-arg",
+        "BUNDLER_VERSION=#{Seatrain::Config.new.bundler_version}",
         {chdir: Rails.root.to_s}
+      )
+      unless ok
+        puts "Docker build failed"
+        exit 1
+      end
+    end
+
+    def push(image, tag)
+      ok = shell_stream(
+        {"DOCKER_BUILDKIT" => "1"},
+        "docker",
+        "push",
+        "#{image}:#{tag}"
       )
       unless ok
         puts "Docker build failed"
