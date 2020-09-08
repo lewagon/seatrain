@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "hashie", "~> 4.1"
   spec.add_dependency "dip", "~> 6.1"
+  spec.add_dependency "anyway_config", ">= 2.0.0"
 end

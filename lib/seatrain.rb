@@ -1,6 +1,7 @@
 require "seatrain/version"
 require "seatrain/railtie" if defined?(Rails::Railtie)
 require "seatrain/docker"
+require "seatrain/config"
 
 module Seatrain
   SEATRAIN_DOCKERDEV_URI = "https://raw.githubusercontent.com/lewagon/rails-base/master/seatrain-templates/Dockerfile.dev"
