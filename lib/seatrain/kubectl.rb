@@ -18,9 +18,9 @@ module Seatrain
         "kubectl",
         "patch",
         "services",
-        "nginx-ingress-nginx-ingress",
+        "nginx-ingress-ingress-nginx-controller",
         "--namespace",
-        "nginx-ingress",
+        "ingress-nginx",
         "-p",
         '{"spec":{"externalTrafficPolicy":"Cluster"}}'
       )
@@ -36,8 +36,8 @@ module Seatrain
         "kubectl",
         "get",
         "service",
-        "--namespace=nginx-ingress",
-        "nginx-ingress-nginx-ingress",
+        "--namespace=ingress-nginx",
+        "nginx-ingress-ingress-nginx-controller",
         "--template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'"
       )
       out.tr("'", "") # otherwise IP addr is single-quoted
