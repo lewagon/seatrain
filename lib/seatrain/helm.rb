@@ -12,13 +12,40 @@ module Seatrain
       end
     end
 
+    # Used to deploy the main application
+    def ugrade_install(tag, extra_arguments)
+      ok, out = shell(
+        "helm",
+        "upgrade",
+        Seatrain.config.app_name,
+        Rails.root.join(".seatrain", "helm").to_s,
+        "--install",
+        "--create-namespace",
+        "--namespace",
+        Seatrain.config.release_namespace,
+        "--atomic",
+        "--cleanup-on-fail",
+        "--timeout=#{Seatrain.config.helm_timeout}",
+        "--set-string",
+        "global.image.tag=#{tag}",
+        *extra_arguments
+      )
+      unless ok
+        puts "`helm upgrade --install` failed, reason: "
+        puts out
+        exit 1
+      end
+      out
+    end
+
+    # Used to prepare cluster with pre-requisite charts
     def install(release_name, chart_name, namespace, *extra)
       ok, out = shell(
         "helm",
         "install",
         release_name,
         chart_name,
-        "--namespace",
+        "--namespace", # TODO: --create-namespace and simplify generator code?
         namespace,
         *extra
       )

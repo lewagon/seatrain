@@ -86,6 +86,24 @@ module Seatrain
       out
     end
 
+    def create_pull_secret(server, login, password)
+      ok, out = shell(
+        "kubectl",
+        "create",
+        "secret",
+        "docker-registry",
+        "#{Seatrain.config.image_name}-pull-secret",
+        "--docker-server=#{Seatrain.config.docker_server}",
+        "--docker-username=#{Seatrain.config.docker_login}",
+        "--docker-password=#{Seatrain.config.docker_password}"
+      )
+      unless ok
+        puts "Could not create pull secret in a cluster, reason:"
+        puts out
+        exit 1
+      end
+    end
+
     private
 
     def executable_not_found

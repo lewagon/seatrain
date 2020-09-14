@@ -53,7 +53,7 @@ module Seatrain
 
       if invoke?
         @dc_transformer = YamlTransformer.new(path)
-        @dc_transformer.deep_replace_key("image", DUMMY_IMAGE_NAME, Seatrain.config.image_name + ":dev")
+        @dc_transformer.deep_replace_key("image", DUMMY_IMAGE_NAME, Seatrain.config.app_name + ":dev")
         @dc_transformer.deep_replace_unique_key("RUBY_VERSION", Seatrain.config.ruby_version)
         @dc_transformer.deep_replace_unique_key("PG_MAJOR", Seatrain.config.pg_version)
         @dc_transformer.deep_replace_unique_key("NODE_MAJOR", Seatrain.config.node_version)
