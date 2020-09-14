@@ -10,4 +10,17 @@ module Seatrain
   SEATRAIN_DOCKERCOMPOSE_URI = "https://raw.githubusercontent.com/lewagon/rails-base/master/seatrain-templates/docker-compose.yml"
   SEATRAIN_DIPYML_URI = "https://raw.githubusercontent.com/lewagon/rails-base/master/seatrain-templates/dip.yml"
   DUMMY_IMAGE_NAME = "seatrain:dev" # TODO: Set as config or ENV?
+
+  class << self
+    def config
+      @config ||= begin
+        require "seatrain/config"
+        Config.new
+      end
+    end
+
+    def configure
+      yield(config) if block_given?
+    end
+  end
 end

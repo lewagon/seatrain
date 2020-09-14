@@ -13,6 +13,7 @@ module Seatrain
       use_webpacker: true
     )
 
+    # TODO: Make image name overridable
     def image_name
       Rails.application.class.module_parent_name.titleize.parameterize
     end

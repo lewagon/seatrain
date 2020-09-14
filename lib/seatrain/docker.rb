@@ -23,15 +23,15 @@ module Seatrain
         "-t",
         "#{image}:#{tag}",
         "--build-arg",
-        "RUBY_VERSION=#{Seatrain::Config.new.ruby_version}",
+        "RUBY_VERSION=#{Seatrain.config.ruby_version}",
         "--build-arg",
-        "PG_MAJOR=#{Seatrain::Config.new.pg_version}",
+        "PG_MAJOR=#{Seatrain.config.pg_version}",
         "--build-arg",
-        "NODE_MAJOR=#{Seatrain::Config.new.node_version}",
+        "NODE_MAJOR=#{Seatrain.config.node_version}",
         "--build-arg",
-        "YARN_VERSION=#{Seatrain::Config.new.yarn_version}",
+        "YARN_VERSION=#{Seatrain.config.yarn_version}",
         "--build-arg",
-        "BUNDLER_VERSION=#{Seatrain::Config.new.bundler_version}",
+        "BUNDLER_VERSION=#{Seatrain.config.bundler_version}",
         {chdir: Rails.root.to_s}
       )
       unless ok
