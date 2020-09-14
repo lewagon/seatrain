@@ -9,6 +9,7 @@ module Seatrain
       :yarn_version,
       :bundler_version,
       :image_name,
+      :production_image_name,
       use_sidekiq: true,
       use_webpacker: true
     )
