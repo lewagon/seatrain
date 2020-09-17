@@ -5,11 +5,11 @@ require_relative "../helm"
 require_relative "../kubectl"
 
 module Seatrain
-  class ProdSetupGenerator < Rails::Generators::Base
+  class ClusterSetupGenerator < Rails::Generators::Base
     NGINX_RETRIES = 18
     NGINX_RETRY_INTERVAL = 30
 
-    namespace "seatrain:setup:prod"
+    namespace "seatrain:setup:cluster"
 
     # TODO: Make sure destroy does something.
     def welcome

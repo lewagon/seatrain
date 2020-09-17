@@ -17,6 +17,7 @@ namespace :seatrain do
 
     desc "Upgrade or install release. `rails seatrain:release:deploy tag=mytag` to customize image tag"
     task deploy: :environment do
+      # TODO: delete pods if the tag is latest or tag with timestamps?
       secrets = Seatrain::SecretsPrompter.new.prompt_all
       puts "\nInstalling helm release, this may take some time..."
       out = Seatrain::Helm.new.ugrade_install(ENV["tag"] || "latest", secrets)

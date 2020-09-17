@@ -14,11 +14,11 @@ module Seatrain
 
     # Used to deploy the main application
     def ugrade_install(tag, extra_arguments)
-      ok, out = shell(
+      cmd = [
         "helm",
         "upgrade",
         Seatrain.config.app_name,
-        Rails.root.join(".seatrain", "helm").to_s,
+        ".seatrain/helm",
         "--install",
         "--create-namespace",
         "--namespace",
@@ -27,9 +27,10 @@ module Seatrain
         "--cleanup-on-fail",
         "--timeout=#{Seatrain.config.helm_timeout}",
         "--set-string",
-        "global.image.tag=#{tag}",
-        *extra_arguments
-      )
+        "global.image.tag=#{tag}"
+      ].concat(extra_arguments)
+
+      ok, out = shell(*cmd)
       unless ok
         puts "`helm upgrade --install` failed, reason: "
         puts out

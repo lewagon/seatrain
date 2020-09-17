@@ -53,10 +53,6 @@ module YamlAnchorSupport
           return @emitter.alias anchor_name
         end
       end
-
-      # accept is a pretty big method, call super to avoid copying
-      # it all here. super will handle the cases when it's an object
-      # that's been seen but doesn't have '@_yaml_anchor_name' set
       super
     end
 
@@ -69,9 +65,6 @@ module YamlAnchorSupport
 
         return @emitter.scalar o, nil, tag, plain, quote, style
       end
-
-      # visit_String is a pretty big method, call super to avoid copying it all
-      # here. super will handle the cases when it's a string other than '<<'
       super
     end
   end

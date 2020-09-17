@@ -4,8 +4,8 @@ module Seatrain
   class Config < Anyway::Config
     attr_config(
       :ruby_version,
-      :pg_version,
-      :node_version,
+      :pg_major_version,
+      :node_major_version,
       :yarn_version,
       :bundler_version,
       :app_name,
@@ -19,7 +19,8 @@ module Seatrain
       release_namespace: "default",
       helm_timeout: "3m0s",
       required_secrets: [],
-      secrets: {}
+      secrets: {},
+      with_apt_packages: []
     )
 
     def app_name
