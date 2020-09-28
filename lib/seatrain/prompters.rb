@@ -1,7 +1,6 @@
 module Seatrain
   class ConfigPrompter < Thor::Shell::Basic
     def prompt(setting, secure: false)
-      return unless Rails.env.development?
       existing = Seatrain.config.send(setting.to_sym)
       return existing if existing
       value = ask("Please, provide #{setting.titleize}", echo: !secure)
@@ -11,7 +10,6 @@ module Seatrain
 
   class SecretsPrompter < Thor::Shell::Basic
     def prompt(secret_name, secure: false)
-      return unless Rails.env.development?
       existing = Seatrain.config.secrets.dig(secret_name)
       return existing if existing
       value = ask("Please, provide value for secret #{secret_name.upcase}", echo: !secure)

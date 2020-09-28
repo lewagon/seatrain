@@ -3,8 +3,21 @@ module Seatrain
     namespace "seatrain:setup:project"
     source_root File.expand_path("templates", __dir__)
 
+    FILES_TO_FORCE = [
+      ".seatrain/Aptfile",
+      "docker-compose.yml",
+      "dip.yml"
+    ]
+
+    FILES_TO_SKIP = [
+      ".seatrain/Dockerfile.dev",
+      ".seatrain/Dockerfile.prod",
+      ".seatrain/.pryrc",
+      ".seatrain/vnc.sh"
+    ]
+
     def welcome
-      say "\t🚃 SEATRAIN LOCAL DOCKER ENVIRONMENT #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      say "🚃 SEATRAIN PROJECT #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
     end
 
     # TODO
@@ -12,25 +25,38 @@ module Seatrain
       # Check if the seatrain.yml exists and recommend running install generator when not
     end
 
+    def warn_overwrite
+      return if revoke?
+      FILES_TO_FORCE.each do |file|
+        if File.exist?(file)
+          exit 1 unless yes?(
+            <<~TXT
+              ⚠️  #{file} will be overwritten with new defaults. If you modified the original configuration,
+              make sure to back up your changes. Continue? (y/n)
+            TXT
+          )
+        end
+      end
+    end
+
     def generate_boilerplate
-      inside(".seatrain") do
-        template "Dockerfile.dev"
-        template "Dockerfile.prod"
-        template "Aptfile"
-        template ".pryrc"
+      FILES_TO_FORCE.each do |file|
+        template file, force: true
       end
 
-      template "docker-compose.yml"
-      template "dip.yml"
+      FILES_TO_SKIP.each do |file|
+        template file, skip: true
+      end
     end
 
     def patch_database_yml
+      return if invoke? && File.read("config/database.yml").match?(/url: <%= ENV\.fetch\("DATABASE_URL"/)
       inject_into_file "config/database.yml", after: 'pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>' do
         <<~YAML
           \n  url: <%= ENV.fetch("DATABASE_URL", " ") %>
         YAML
       end
-      say_status :info, '👌 url: <%= ENV.fetch("DATABASE_URL", " ") injected into config/database.yml' if invoke?
+      say_status :info, '👌 `url: <%= ENV.fetch("DATABASE_URL", " ") %>` injected into config/database.yml' if invoke?
     end
 
     def summarize

@@ -1,6 +1,5 @@
 require "open-uri"
 require "ipaddr"
-require_relative "../yaml_transformer"
 require_relative "../helm"
 require_relative "../kubectl"
 

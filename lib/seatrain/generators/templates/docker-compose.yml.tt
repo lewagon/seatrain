@@ -61,6 +61,12 @@ services:
     command: bundle exec sidekiq -C config/sidekiq.yml
     depends_on:
       - app
+<% else -%>
+  # sidekiq:
+  #   <<: *template-app
+  #   command: bundle exec sidekiq -C config/sidekiq.yml
+  #   depends_on:
+  #    - app
 <% end -%>
 
 <% if seatrain_use_webpacker -%>
@@ -73,6 +79,16 @@ services:
       - NODE_ENV=${NODE_ENV:-development}
       - RAILS_ENV=${RAILS_ENV:-development}
       - WEBPACKER_DEV_SERVER_HOST=0.0.0.0
+<% else -%>
+  # webpacker:
+  #  <<: *template-app
+  #  command: bundle exec webpack-dev-server
+  #  ports:
+  #    - 3035:3035
+  #  environment:
+  #    - NODE_ENV=${NODE_ENV:-development}
+  #    - RAILS_ENV=${RAILS_ENV:-development}
+  #    - WEBPACKER_DEV_SERVER_HOST=0.0.0.0  
 <% end -%>
 
   postgres:
@@ -81,7 +97,7 @@ services:
       - postgres:/var/lib/postgresql/data
       - "./log:/root/log:cached"
     ports:
-      - 5432
+      - 5432:5433
     environment:
       - POSTGRES_PASSWORD=postgres
 
