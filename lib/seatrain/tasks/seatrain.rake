@@ -15,8 +15,8 @@ namespace :seatrain do
       Seatrain::Docker.new.push(Seatrain.config.production_image_name, ENV["tag"] || "latest")
     end
 
-    desc "Upgrade or install release. `rails seatrain:release:deploy tag=mytag` to customize image tag"
-    task deploy: :environment do
+    desc "Upgrade or install release. `rails seatrain:release:upgrade tag=mytag` to customize image tag"
+    task upgrade: :environment do
       # TODO: delete pods if the tag is latest or tag with timestamps?
       secrets = Seatrain::SecretsPrompter.new.prompt_all
       puts "\nInstalling helm release, this may take some time..."
@@ -24,10 +24,6 @@ namespace :seatrain do
       puts out
     end
 
-    # TODO: Task that does everything, checking/creating pull secret in namespace first
-  end
-
-  namespace :cluster do
     desc "Create the image pull secret in a cluster"
     task create_pull_secret: :environment do
       prompter = Seatrain::ConfigPrompter.new
@@ -35,6 +31,12 @@ namespace :seatrain do
       login = prompter.prompt("docker_login")
       password = prompter.prompt("docker_password", secure: true)
       Seatrain::Kubectl.new.create_pull_secret(server, login, password)
+    end
+
+    desc "Deploy new release (build and push fresh image, check/create pull secret)"
+    task deploy: :environment do
+      Rake::Task["seatrain:release:build"].invoke
+      Rake::Task["seatrain:release:push"].invoke
     end
   end
 end

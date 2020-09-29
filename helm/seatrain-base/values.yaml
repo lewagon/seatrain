@@ -34,7 +34,6 @@ global:
   # ENV variables declared here will be set for both Rails and Sidekiq pods
   commonEnv: {}
 
-  # TODO: Find better names for config/secret keys
   commonSecrets: {}
 
   db:

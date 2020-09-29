@@ -46,7 +46,8 @@ module Seatrain
         "install",
         release_name,
         chart_name,
-        "--namespace", # TODO: --create-namespace and simplify generator code?
+        "--create-namespace",
+        "--namespace",
         namespace,
         *extra
       )
@@ -88,6 +89,21 @@ module Seatrain
       ok
     end
 
+    def update_deps
+      ok, out = shell(
+        "helm",
+        "dep",
+        "update",
+        ".seatrain/helm"
+      )
+      unless ok
+        puts "`helm repo update` failed, reason: "
+        puts out
+        exit 1
+      end
+      ok
+    end
+
     def release_exists?(namespace, release)
       ok, out = shell(
         "helm",
@@ -102,6 +118,20 @@ module Seatrain
       end
 
       out.match?(/#{release}/)
+    end
+
+    def version
+      ok, out = shell(
+        "helm",
+        "version",
+        "--short"
+      )
+      unless ok
+        puts "`helm version` failed, reason: "
+        puts out
+        exit 1
+      end
+      out
     end
 
     private

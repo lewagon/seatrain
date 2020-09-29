@@ -25,7 +25,12 @@ module Seatrain
     end
 
     def check_helm_version
-      # TODO Must be version 3, or else...
+      return if revoke?
+      current_version = @helm.version
+      if current_version.match(/v(\d)/)[1].to_i < 2
+        say "Helm version needs to be 3 or greater, current version: #{current_version}", :red
+        exit 0
+      end
     end
 
     def warn_context
@@ -49,11 +54,6 @@ module Seatrain
         return
       end
 
-      unless @kubectl.namespace_exists?(namespace)
-        say_status :info, "[KUBECTL] Creating #{namespace} namespace..."
-        @kubectl.create_namespace(namespace)
-      end
-
       out = @helm.add_repo(
         "ingress-nginx",
         "https://kubernetes.github.io/ingress-nginx"
@@ -61,7 +61,7 @@ module Seatrain
       say_status :info, "[HELM] #{out}"
       say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
 
-      say_status :info, "[HELM] Installing NGINX Ingress Controller"
+      say_status :info, "[HELM] Installing NGINX Ingress Controller in the #{namespace} namespace"
       @helm.install(name, "ingress-nginx/ingress-nginx ", namespace)
       say_status :info, "[HELM]  🎉  NGINX Ingress Controller installed"
       say_status :info, "[KUBECTL] Waiting for LoadBalancer to become available..."
@@ -102,11 +102,6 @@ module Seatrain
         return
       end
 
-      unless @kubectl.namespace_exists?(name)
-        say_status :info, "[KUBECTL] Creating #{name} namespace..."
-        @kubectl.create_namespace(name)
-      end
-
       out = @helm.add_repo(
         "jetstack",
         "https://charts.jetstack.io"
@@ -114,7 +109,7 @@ module Seatrain
       say_status :info, "[HELM] #{out}"
       say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
 
-      say_status :info, "[HELM] Installing cert-manager..."
+      say_status :info, "[HELM] Installing cert-manager in #{namespace} namespace"
       @helm.install(
         name,
         "jetstack/cert-manager",

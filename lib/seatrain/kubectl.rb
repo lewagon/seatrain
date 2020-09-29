@@ -43,6 +43,7 @@ module Seatrain
       out.tr("'", "") # otherwise IP addr is single-quoted
     end
 
+    # TODO: Cleanup, use more generic method below
     def namespace_exists?(name)
       ok, out = shell(
         "kubectl",
@@ -57,6 +58,27 @@ module Seatrain
         exit 1
       end
       out.match?(/#{name}/)
+    end
+
+    def resource_exists?(type, name)
+      ok, out = shell(
+        "kubectl",
+        "get",
+        type,
+        name
+      )
+      unless ok
+        return false if out.match?(/NotFound/)
+        puts "Could not get #{type} in the cluster, reason:"
+        puts out
+        exit 1
+      end
+      out.match?(/#{name}/)
+    end
+
+    # TODO: to remove pods
+    # kubectl delete pods --selector app.kubernetes.io/name=linkedin
+    def delete_resource(type, name)
     end
 
     def create_namespace(name)
@@ -92,7 +114,7 @@ module Seatrain
         "create",
         "secret",
         "docker-registry",
-        "#{Seatrain.config.image_name}-pull-secret",
+        "#{Seatrain.config.app_name}-pull-secret",
         "--docker-server=#{Seatrain.config.docker_server}",
         "--docker-username=#{Seatrain.config.docker_login}",
         "--docker-password=#{Seatrain.config.docker_password}"

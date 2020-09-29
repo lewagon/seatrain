@@ -14,6 +14,8 @@ module Seatrain
       :docker_server,
       :docker_login,
       :docker_password,
+      :hostname,
+      :certificate_email,
       use_sidekiq: true,
       use_webpacker: true,
       release_namespace: "default",

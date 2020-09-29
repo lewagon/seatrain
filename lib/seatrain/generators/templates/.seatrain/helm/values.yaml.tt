@@ -1,0 +1,54 @@
+global:
+  fullnameOverride: <%= seatrain_app_name %>
+
+  image:
+    repository: <%= seatrain_production_image_name %>
+    tag: latest
+    pullPolicy: Always
+    pullSecret: <%= seatrain_app_name %>-pull-secret
+
+  rails:
+    replicaCount: 1
+    # resources: {}
+    # livenessProbe: {}
+    # readinessProbe: {}
+    # nodeSelector: {}
+    # tolerations: []
+    # affinity: {}
+    # podSecurityContext: {}
+    # securityContext: {}
+
+  sidekiq:
+    replicaCount: 1
+    # resources: {}
+    # livenessProbe: {}
+    # readinessProbe: {}
+    # nodeSelector: {}
+    # tolerations: []
+    # affinity: {}
+    # podSecurityContext: {}
+    # securityContext: {}
+
+  # ENV variables declared here will be set for both Rails and Sidekiq pods
+  commonEnv: {}
+
+  db:
+    prepareJob:
+      enabled: true
+
+  https:
+    enabled: true
+    certificateEmail: <%= seatrain_certificate_email %>
+
+  ingress:
+    hosts:
+      - host: <%= seatrain_hostname %>
+
+redis:
+  cluster:
+    enabled: false
+    slaveCount: 2
+  usePassword: false
+  # By default, FLUSH and FLUSHALL are disabled in bitnami/redis chart
+  master:
+    disableCommands: []

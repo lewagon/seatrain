@@ -1,6 +1,6 @@
 module Seatrain
-  class LocalSetupGenerator < Rails::Generators::Base
-    namespace "seatrain:setup:project"
+  class DockerSetupGenerator < Rails::Generators::Base
+    namespace "seatrain:setup:docker"
     source_root File.expand_path("templates", __dir__)
 
     FILES_TO_FORCE = [
@@ -17,12 +17,15 @@ module Seatrain
     ]
 
     def welcome
-      say "🚃 SEATRAIN PROJECT #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      say "🚃 SEATRAIN DOCKER #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
     end
 
-    # TODO
     def check_seatrain_yml
-      # Check if the seatrain.yml exists and recommend running install generator when not
+      return if revoke?
+      unless File.exist?("config/seatrain.yml")
+        say "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`", :red
+        exit 0
+      end
     end
 
     def warn_overwrite
