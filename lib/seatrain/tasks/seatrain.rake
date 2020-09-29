@@ -17,7 +17,6 @@ namespace :seatrain do
 
     desc "Upgrade or install release. `rails seatrain:release:upgrade tag=mytag` to customize image tag"
     task upgrade: :environment do
-      # TODO: delete pods if the tag is latest or tag with timestamps?
       secrets = Seatrain::SecretsPrompter.new.prompt_all
       puts "\nInstalling helm release, this may take some time..."
       out = Seatrain::Helm.new.ugrade_install(ENV["tag"] || "latest", secrets)
@@ -33,10 +32,24 @@ namespace :seatrain do
       Seatrain::Kubectl.new.create_pull_secret(server, login, password)
     end
 
+    desc "Remove running application pods"
+    task remove_pods: :environment do
+      Seatrain::Kubectl.new.delete_resource(
+        :pods,
+        "app.kubernetes.io/name=#{Seatrain::Config.app_name}"
+      )
+    end
+
     desc "Deploy new release (build and push fresh image, check/create pull secret)"
     task deploy: :environment do
       Rake::Task["seatrain:release:build"].invoke
       Rake::Task["seatrain:release:push"].invoke
+      secret_name = "#{Seatrain::Config.app_name}-pull-secret"
+      unless Seatrain::Kubernetes.new.resource_exists?(:secret, secret_name)
+        Rake::Task["seatrain:release:create_pull_secret"].invoke
+      end
+      Rake::Task["seatrain:release:upgrade"].invoke
+      Rake::Task["seatrain:release:remove_pods"].invoke
     end
   end
 end

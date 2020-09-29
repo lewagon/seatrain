@@ -64,7 +64,7 @@ module Seatrain
       ok, out = shell(
         "kubectl",
         "get",
-        type,
+        type.to_s,
         name
       )
       unless ok
@@ -76,9 +76,19 @@ module Seatrain
       out.match?(/#{name}/)
     end
 
-    # TODO: to remove pods
-    # kubectl delete pods --selector app.kubernetes.io/name=linkedin
-    def delete_resource(type, name)
+    def delete_resource(type, selector)
+      ok, out = shell(
+        "kubectl",
+        "delete",
+        type.to_s,
+        "--selector",
+        selector
+      )
+      unless ok
+        puts "Could not delete pods, reason:"
+        puts out
+        exit 1
+      end
     end
 
     def create_namespace(name)
