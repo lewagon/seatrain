@@ -3,8 +3,10 @@ module Seatrain
     def prompt(setting, secure: false)
       existing = Seatrain.config.send(setting.to_sym)
       return existing if existing
-      value = ask("Please, provide #{setting.titleize}\n", echo: !secure)
+      value = ask("Please, provide #{setting.titleize}", echo: !secure)
       Seatrain.config.send("#{setting}=".to_sym, value)
+      $stdout.puts "\n Got it! 👌"
+      value
     end
   end
 
@@ -12,8 +14,10 @@ module Seatrain
     def prompt(secret_name, secure: false)
       existing = Seatrain.config.secrets.dig(secret_name)
       return existing if existing
-      value = ask("Please, provide value for secret #{secret_name.upcase}\n", echo: !secure)
+      value = ask("Please, provide value for secret #{secret_name.upcase}", echo: !secure)
       Seatrain.config.secrets[secret_name] = value
+      $stdout.puts "\n Got it! 👌"
+      value
     end
 
     def prompt_all
