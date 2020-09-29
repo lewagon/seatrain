@@ -4,7 +4,6 @@ module Seatrain
       existing = Seatrain.config.send(setting.to_sym)
       return existing if existing
       value = ask("Please, provide #{setting.titleize}", echo: !secure)
-      puts "\n"
       Seatrain.config.send("#{setting}=".to_sym, value)
     end
   end
@@ -14,7 +13,6 @@ module Seatrain
       existing = Seatrain.config.secrets.dig(secret_name)
       return existing if existing
       value = ask("Please, provide value for secret #{secret_name.upcase}", echo: !secure)
-      puts "\n"
       Seatrain.config.secrets[secret_name] = value
     end
 
