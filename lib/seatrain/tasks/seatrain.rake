@@ -36,7 +36,7 @@ namespace :seatrain do
     task remove_pods: :environment do
       Seatrain::Kubectl.new.delete_resource(
         :pods,
-        "app.kubernetes.io/name=#{Seatrain::Config.app_name}"
+        "app.kubernetes.io/name=#{Seatrain.config.app_name}"
       )
     end
 
@@ -44,8 +44,8 @@ namespace :seatrain do
     task deploy: :environment do
       Rake::Task["seatrain:release:build"].invoke
       Rake::Task["seatrain:release:push"].invoke
-      secret_name = "#{Seatrain::Config.app_name}-pull-secret"
-      unless Seatrain::Kubernetes.new.resource_exists?(:secret, secret_name)
+      secret_name = "#{Seatrain.config.app_name}-pull-secret"
+      unless Seatrain::Kubectl.new.resource_exists?(:secret, secret_name)
         Rake::Task["seatrain:release:create_pull_secret"].invoke
       end
       Rake::Task["seatrain:release:upgrade"].invoke
