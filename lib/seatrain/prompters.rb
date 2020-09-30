@@ -11,7 +11,7 @@ module Seatrain
   end
 
   class SecretsPrompter < Thor::Shell::Basic
-    def prompt(secret_name, secure: false)
+    def prompt(secret_name, secure: true)
       existing = Seatrain.config.secrets.dig(secret_name)
       return existing if existing
       value = ask("Please, provide value for secret #{secret_name.upcase}", echo: !secure)

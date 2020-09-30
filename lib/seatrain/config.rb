@@ -1,6 +1,9 @@
 require "anyway_config"
 
 module Seatrain
+  # To be removed once the anyway_config 2.1 becomes available
+  Anyway.loaders.override :yml, Anyway::Loaders::YAML
+
   class Config < Anyway::Config
     attr_config(
       :ruby_version,

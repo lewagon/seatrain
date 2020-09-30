@@ -8,7 +8,7 @@ module Seatrain
     NGINX_RETRIES = 18
     NGINX_RETRY_INTERVAL = 30
 
-    namespace "seatrain:setup:cluster"
+    namespace "seatrain:cluster:prepare"
 
     # TODO: Make sure destroy does something.
     def welcome

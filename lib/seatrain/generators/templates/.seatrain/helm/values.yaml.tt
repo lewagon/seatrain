@@ -35,6 +35,11 @@ global:
   db:
     prepareJob:
       enabled: true
+      <%= if Rails::VERSION::MAJOR > 6 -%>
+      command: "rails db:prepare"
+      <% else -%>
+      command: "rails db:create db:migrate"
+      <% end -%>
 
   https:
     enabled: true

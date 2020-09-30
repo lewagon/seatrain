@@ -1,6 +1,6 @@
 module Seatrain
   class ChartSetupGenerator < Rails::Generators::Base
-    namespace "seatrain:setup:chart"
+    namespace "seatrain:helm"
     source_root File.expand_path("templates", __dir__)
 
     def welcome

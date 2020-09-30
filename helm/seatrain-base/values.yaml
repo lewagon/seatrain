@@ -38,7 +38,8 @@ global:
 
   db:
     prepareJob:
-      enabled: false
+      enabled: true
+      command: "rails db:create db:migrate"
 
   service:
     type: ClusterIP

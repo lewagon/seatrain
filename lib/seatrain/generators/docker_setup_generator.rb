@@ -1,6 +1,6 @@
 module Seatrain
   class DockerSetupGenerator < Rails::Generators::Base
-    namespace "seatrain:setup:docker"
+    namespace "seatrain:docker"
     source_root File.expand_path("templates", __dir__)
 
     FILES_TO_FORCE = [
