@@ -23,13 +23,13 @@ module Seatrain
 
     # TODO:
     def print_instructions
-      prompt.warn "⚠️  You need to set the following secrets in your GitHub repository: \n"
-      prompt.warn "👉  DIGITALOCEAN_ACCESS_TOKEN"
-      prompt.warn "👉  DOCKER_USERNAME" unless Seatrain.config.uses_docr? || Seatrain.config.docker_username.empty?
-      prompt.warn "👉  DOCKER_PASSWORD" unless Seatrain.config.uses_docr?
-      prompt.warn "👉  RAILS_MASTER_KEY"
+      prompt.warn "⚠️  You need to set the following secrets in your GitHub repository:"
+      prompt.say "👉  DIGITALOCEAN_ACCESS_TOKEN"
+      prompt.say "👉  DOCKER_USERNAME" unless Seatrain.config.uses_docr? || Seatrain.config.docker_username.empty?
+      prompt.say "👉  DOCKER_PASSWORD" unless Seatrain.config.uses_docr?
+      prompt.say "👉  RAILS_MASTER_KEY"
       Seatrain.config.required_secrets.each do |name|
-        prompt.warn "👉  #{name.upcase}"
+        prompt.say "👉  #{name.upcase}"
       end
     end
 
