@@ -23,7 +23,7 @@ module Seatrain
 
     # TODO:
     def print_instructions
-      promt.warn "⚠️  You need to set the following secrets in your GitHub repository: "
+      prompt.warn "⚠️  You need to set the following secrets in your GitHub repository: "
       prompt.warn "👉  DOCKER_USERNAME" unless Seatrain.config.uses_docr? || Seatrain.config.docker_username.empty?
       prompt.warn "👉  DOCKER_PASSWORD" unless Seatrain.config.uses_docr?
       prompt.warn "👉  RAILS_MASTER_KEY"
