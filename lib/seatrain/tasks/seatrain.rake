@@ -1,7 +1,4 @@
 require_relative "../prompters"
-require_relative "../docker"
-require_relative "../kubectl"
-require_relative "../helm"
 
 namespace :seatrain do
   namespace :release do
@@ -17,7 +14,7 @@ namespace :seatrain do
 
     desc "Upgrade or install release. `rails seatrain:release:upgrade tag=mytag` to customize image tag"
     task upgrade: :environment do
-      secrets = Seatrain::SecretsPrompter.new.prompt_all
+      secrets = Seatrain::SecretsPrompter.new.secrets_to_helm_flags
       puts "\nInstalling helm release, this may take some time..."
       out = Seatrain::Helm.new.ugrade_install(ENV["tag"] || "latest", secrets)
       puts out

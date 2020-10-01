@@ -20,7 +20,7 @@ module Seatrain
       value
     end
 
-    def prompt_all
+    def secrets_to_helm_flags
       Seatrain.config.required_secrets.map { |name|
         value = prompt(name.downcase, secure: true)
         ["--set-string", "global.commonSecrets.#{name.upcase}=#{value}"]

@@ -12,24 +12,14 @@ module Seatrain
       end
     end
 
-    # Used to deploy the main application
+    # Use to deploy the main application
     def ugrade_install(tag, extra_arguments)
-      cmd = [
-        "helm",
-        "upgrade",
-        Seatrain.config.app_name,
-        ".seatrain/helm",
-        "--install",
-        "--create-namespace",
-        "--namespace",
-        Seatrain.config.release_namespace,
-        "--atomic",
-        "--cleanup-on-fail",
-        "--timeout=#{Seatrain.config.helm_timeout}",
-        "--set-string",
-        "global.image.tag=#{tag}"
-      ].concat(extra_arguments)
-
+      cmd = base_upgrade_command.concat(
+        [
+          "--set-string",
+          "global.image.tag=#{tag}"
+        ]
+      ).concat(extra_arguments)
       ok, out = shell(*cmd)
       unless ok
         puts "`helm upgrade --install` failed, reason: "
@@ -39,7 +29,19 @@ module Seatrain
       out
     end
 
-    # Used to prepare cluster with pre-requisite charts
+    # Generates string to inject into GitHub actions deploy YML
+    def safe_upgrade_command_string(indent: 10)
+      str = ""
+      base_upgrade_command.each do |seg|
+        str << "#{" " * indent}#{seg}\n"
+      end
+      Seatrain.config.required_secrets.each do |name|
+        str << "#{" " * indent}--set-string global.commonSecrets.#{name.upcase}=${{ secrets.#{name.upcase} }}\n"
+      end
+      str
+    end
+
+    # Use to prepare cluster with pre-requisite charts
     def install(release_name, chart_name, namespace, *extra)
       ok, out = shell(
         "helm",
@@ -135,6 +137,22 @@ module Seatrain
     end
 
     private
+
+    def base_upgrade_command
+      [
+        "helm",
+        "upgrade",
+        Seatrain.config.app_name,
+        ".seatrain/helm",
+        "--install",
+        "--create-namespace",
+        "--namespace",
+        Seatrain.config.release_namespace,
+        "--atomic",
+        "--cleanup-on-fail",
+        "--timeout=#{Seatrain.config.helm_timeout}"
+      ]
+    end
 
     def executable_not_found
       "Helm executable not found in $PATH, refer to setup instructions and re-run this generator after installing Helm 3"
