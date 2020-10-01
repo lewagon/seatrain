@@ -29,6 +29,16 @@ namespace :seatrain do
       Seatrain::Kubectl.new.create_pull_secret(server, login, password)
     end
 
+    desc "Create image pull secret in a cluster for Digital Ocean Container Registry"
+    task create_pull_secret_docr: :environment do
+      # DO-specfic way as per documentation
+      unless system("doctl registry kubernetes-manifest | kubectl apply -f -")
+        puts "Attempt to create pull-secret with Digital Ocean Container Registry failed"
+        puts "Try running `doctl registry kubernetes-manifest | kubectl apply -f -` manually"
+        exit 1
+      end
+    end
+
     desc "Remove running application pods"
     task remove_pods: :environment do
       Seatrain::Kubectl.new.delete_resource(
@@ -41,10 +51,16 @@ namespace :seatrain do
     task deploy: :environment do
       Rake::Task["seatrain:release:build"].invoke
       Rake::Task["seatrain:release:push"].invoke
-      secret_name = "#{Seatrain.config.app_name}-pull-secret"
-      unless Seatrain::Kubectl.new.resource_exists?(:secret, secret_name)
-        Rake::Task["seatrain:release:create_pull_secret"].invoke
+
+      if Seatrain.config.uses_docr?
+        Rake::Tasl["seatrain:release:create_pull_secret_docr"]
+      else
+        secret_name = "#{Seatrain.config.app_name}-pull-secret"
+        unless Seatrain::Kubectl.new.resource_exists?(:secret, secret_name)
+          Rake::Task["seatrain:release:create_pull_secret"].invoke
+        end
       end
+
       Rake::Task["seatrain:release:upgrade"].invoke
       Rake::Task["seatrain:release:remove_pods"].invoke
     end

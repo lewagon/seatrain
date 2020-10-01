@@ -1,10 +1,12 @@
 require "anyway_config"
 
 module Seatrain
-  # To be removed once the anyway_config 2.1 becomes available
+  # PRE-RELEASE: To be removed once the anyway_config 2.1 becomes available
   Anyway.loaders.override :yml, Anyway::Loaders::YAML
 
   class Config < Anyway::Config
+    DOCR_URL = "registry.digitalocean.com"
+
     attr_config(
       :ruby_version,
       :pg_major_version,
@@ -18,6 +20,7 @@ module Seatrain
       :docker_login,
       :docker_password,
       :do_cluster_name,
+      :do_container_registry_name,
       :hostname,
       :certificate_email,
       use_sidekiq: true,
@@ -28,6 +31,10 @@ module Seatrain
       secrets: {},
       with_apt_packages: []
     )
+
+    def uses_docr?
+      docker_server == DOCR_URL
+    end
 
     def app_name
       super || Rails.application.class.module_parent_name.titleize.parameterize

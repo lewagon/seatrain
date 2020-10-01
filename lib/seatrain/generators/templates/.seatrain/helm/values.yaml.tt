@@ -5,7 +5,11 @@ global:
     repository: <%= seatrain_production_image_name %>
     tag: latest
     pullPolicy: Always
+<% if seatrain_uses_docr? -%>
+    pullSecret: registry-<%= seatrain_do_container_registry_name %>
+<% else -%>
     pullSecret: <%= seatrain_app_name %>-pull-secret
+<% end -%>
 
   rails:
     replicaCount: 1
