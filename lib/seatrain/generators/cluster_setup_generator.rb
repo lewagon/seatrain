@@ -1,4 +1,3 @@
-require "open-uri"
 require "ipaddr"
 require_relative "../helm"
 require_relative "../kubectl"
@@ -10,16 +9,15 @@ module Seatrain
 
     namespace "seatrain:cluster:prepare"
 
-    # TODO: Make sure destroy does something.
     def welcome
-      say "\t🚃 SEATRAIN PRODUCTION ENVIRONMENT #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      prompt.ok "🚃 SEATRAIN CLUSTER PREPARATION 🌊"
 
-      say "\t⚠️  helm and kubectl executables need to be installed and available in $PATH for generator to continue"
+      prompt.warn "⚠️  helm and kubectl executables need to be installed and available in $PATH for generator to continue"
     end
 
     def check_tools
       return if revoke?
-      # Both initializers will exit if executables not found
+      # Initializers will exit if executables not found
       @helm = Helm.new
       @kubectl = Kubectl.new
     end
@@ -28,7 +26,7 @@ module Seatrain
       return if revoke?
       current_version = @helm.version
       if current_version.match(/v(\d)/)[1].to_i < 2
-        say "Helm version needs to be 3 or greater, current version: #{current_version}", :red
+        prompt.error "Helm version needs to be 3 or greater, current version: #{current_version}"
         exit 0
       end
     end
@@ -36,9 +34,9 @@ module Seatrain
     def warn_context
       return if revoke?
       ctx = @kubectl.current_context
-      say_status :info, "Your Kubernetes context is set to \e[1m#{ctx}\e[22m"
-      unless yes? "\tIs this a cluster where you plan to deploy? 👆"
-        say "Make sure to select the correct Kubernetes context and re-run this generator", :yellow
+      prompt.warn "Your Kubernetes context is set to \e[1m#{ctx}\e[22m"
+      unless prompt.yes? "Is this a cluster where you plan to deploy? 👆"
+        prompt.ok "Make sure to set the correct Kubernetes context and re-run this generator"
         exit 0
       end
     end
@@ -50,7 +48,7 @@ module Seatrain
       namespace = "ingress-nginx"
 
       if @helm.release_exists?(namespace, name)
-        say_status :info, "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
+        prompt.say "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
         return
       end
 
@@ -58,13 +56,13 @@ module Seatrain
         "ingress-nginx",
         "https://kubernetes.github.io/ingress-nginx"
       )
-      say_status :info, "[HELM] #{out}"
-      say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
+      prompt.say "[HELM] #{out}"
+      prompt.say "[HELM] repositories succesfully updated" if @helm.update_repo
 
-      say_status :info, "[HELM] Installing NGINX Ingress Controller in the #{namespace} namespace"
+      prompt.say "[HELM] Installing NGINX Ingress Controller in the #{namespace} namespace"
       @helm.install(name, "ingress-nginx/ingress-nginx ", namespace)
-      say_status :info, "[HELM]  🎉  NGINX Ingress Controller installed"
-      say_status :info, "[KUBECTL] Waiting for LoadBalancer to become available..."
+      prompt.say "[HELM]  🎉  NGINX Ingress Controller installed"
+      prompt.say "[KUBECTL] Waiting for LoadBalancer to become available..."
 
       success = ip = nil
       begin
@@ -73,24 +71,24 @@ module Seatrain
           ip = IPAddr.new(out)
           success = true
         rescue IPAddr::InvalidAddressError
-          say_status :info, "Attempt #{i + 1}/#{NGINX_RETRIES} ☕️ Retrying in #{NGINX_RETRY_INTERVAL} seconds..."
+          prompt.say "Attempt #{i + 1}/#{NGINX_RETRIES} ☕️ Retrying in #{NGINX_RETRY_INTERVAL} seconds..."
           sleep(NGINX_RETRY_INTERVAL)
           next
         end
       end
 
       if success
-        say_status :info, "[KUBECTL]  🎉  Load balancer created, public IP: #{ip}"
+        prompt.say "[KUBECTL]  🎉  Load balancer created, public IP: #{ip}"
       else
-        say_status :error, "[KUBECTL] Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard", :red
+        propmt.error "[KUBECTL] Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard"
       end
     end
 
     # Patch nginx-ingress service in Digital Ocean
     def patch_do_load_balancer
-      say_status :info, "[KUBECTL] Patching externalTrafficPolicy from Local to Cluster"
+      prompt.say "[KUBECTL] Patching externalTrafficPolicy from Local to Cluster"
       @kubectl.patch_do_load_balancer
-      say_status :info, "[KUBECTL] 🎉  Success!"
+      prompt.say "[KUBECTL] 🎉  Success!"
     end
 
     def install_certmanager
@@ -98,7 +96,7 @@ module Seatrain
       name = namespace = "cert-manager"
 
       if @helm.release_exists?(namespace, name)
-        say_status :info, "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
+        prompt.say "🙌 #{name} already installed in a namespace #{namespace}, skipping..."
         return
       end
 
@@ -106,10 +104,10 @@ module Seatrain
         "jetstack",
         "https://charts.jetstack.io"
       )
-      say_status :info, "[HELM] #{out}"
-      say_status :info, "[HELM] repositories succesfully updated" if @helm.update_repo
+      prompt.say "[HELM] #{out}"
+      prompt.say "[HELM] repositories succesfully updated" if @helm.update_repo
 
-      say_status :info, "[HELM] Installing cert-manager in #{namespace} namespace"
+      prompt.say "[HELM] Installing cert-manager in #{namespace} namespace"
       @helm.install(
         name,
         "jetstack/cert-manager",
@@ -119,12 +117,15 @@ module Seatrain
         "--set",
         "installCRDs=true"
       )
-      say_status :info, "[HELM]  🎉  cert-manager installed"
+      prompt.say "[HELM]  🎉  cert-manager installed"
     end
 
     private
 
-    # TODO: DRY
+    def prompt
+      @prompt ||= TTY::Prompt.new
+    end
+
     def invoke?
       behavior == :invoke
     end

@@ -3,7 +3,6 @@ module SystemHelpers
 
   protected
 
-  # TODO: move `unless ok — exit 1` logic here
   def shell(*args)
     stdin, stdouterr, thr = Open3.popen2e(*args)
     out = stdouterr.read

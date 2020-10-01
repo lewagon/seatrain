@@ -6,7 +6,7 @@ global:
     tag: latest
     pullPolicy: Always
 <% if seatrain_uses_docr? -%>
-    pullSecret: registry-<%= seatrain_do_container_registry_name %>
+    pullSecret: registry-<%= seatrain_docker_repository %>
 <% else -%>
     pullSecret: <%= seatrain_app_name %>-pull-secret
 <% end -%>

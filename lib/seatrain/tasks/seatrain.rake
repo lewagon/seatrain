@@ -23,8 +23,8 @@ namespace :seatrain do
     desc "Create the image pull secret in a cluster"
     task create_pull_secret: :environment do
       prompter = Seatrain::ConfigPrompter.new
-      server = prompter.prompt("docker_server")
-      login = prompter.prompt("docker_login")
+      server = prompter.prompt("docker_registry")
+      login = prompter.prompt("docker_username")
       password = prompter.prompt("docker_password", secure: true)
       Seatrain::Kubectl.new.create_pull_secret(server, login, password)
     end

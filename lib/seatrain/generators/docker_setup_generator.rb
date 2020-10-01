@@ -17,28 +17,33 @@ module Seatrain
     ]
 
     def welcome
-      say "🚃 SEATRAIN DOCKER #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      prompt.say "🚃 SEATRAIN DOCKER #{invoke? ? "SETUP" : "CLEANUP"} 🌊"
     end
 
     def check_seatrain_yml
       return if revoke?
       unless File.exist?("config/seatrain.yml")
-        say "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`", :red
+        prompt.warn "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`"
         exit 0
       end
     end
 
     def warn_overwrite
       return if revoke?
-      FILES_TO_FORCE.each do |file|
-        if File.exist?(file)
-          exit 1 unless yes?(
-            <<~TXT
-              ⚠️  #{file} will be overwritten with new defaults. If you modified the original configuration,
-              make sure to back up your changes. Continue? (y/n)
-            TXT
-          )
-        end
+      existing = FILES_TO_FORCE.select { |file| File.exist?(file) }
+      if existing.present?
+        prompt.warn <<~TXT
+          ⚠️  These files will be overwritten based on new settings in `config/seatrain.yml`:
+
+          #{existing.map { |file| "👉  #{file}" }.join("\n")}
+
+          If you modified the default boilerplate in those files, make sure to back up your work (e.g., make a git commit)
+        TXT
+      end
+
+      unless prompt.yes?("Overwrite files?")
+        prompt.ok("No worries. Re-run this generator once ready.")
+        exit 0
       end
     end
 
@@ -59,15 +64,19 @@ module Seatrain
           \n  url: <%= ENV.fetch("DATABASE_URL", " ") %>
         YAML
       end
-      say_status :info, '👌 `url: <%= ENV.fetch("DATABASE_URL", " ") %>` injected into config/database.yml' if invoke?
+      prompt.ok '👌 `url: <%= ENV.fetch("DATABASE_URL", " ") %>` injected into config/database.yml' if invoke?
     end
 
     def summarize
       return if revoke?
-      say "\nAll set, you can run your app in containers locally now! 📦 \nRun `dip provision` to start"
+      prompt.ok "\nAll set, you can run your app in containers locally now! 📦 \nRun `dip provision` to start"
     end
 
     private
+
+    def prompt
+      @prompt ||= TTY::Prompt.new
+    end
 
     def method_missing(method, *args, &block)
       if method.to_s.start_with?("seatrain")

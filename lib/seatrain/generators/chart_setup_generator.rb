@@ -4,7 +4,7 @@ module Seatrain
     source_root File.expand_path("templates", __dir__)
 
     def welcome
-      say "🚃 SEATRAIN HELM #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      prompt.say "🚃 SEATRAIN HELM #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
     end
 
     def check_tools
@@ -16,7 +16,7 @@ module Seatrain
       return if revoke?
       current_version = @helm.version
       if current_version.match(/v(\d)/)[1].to_i < 2
-        say "Helm version needs to be 3 or greater, current version: #{current_version}", :red
+        prompt.error "Helm version needs to be 3 or greater, current version: #{current_version}"
         exit 0
       end
     end
@@ -24,34 +24,38 @@ module Seatrain
     def check_seatrain_yml
       return if revoke?
       unless File.exist?("config/seatrain.yml")
-        say "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`", :red
+        prompt.warn "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`"
         exit 0
       end
     end
 
     def generate_boilerplate
       inside ".seatrain/helm" do
-        template "values.yaml"
-        template "Chart.yaml"
-        template "templates/cron-example.yaml"
+        template "values.yaml", force: true
+        template "Chart.yaml", force: true
+        template "templates/cron-example.yaml", force: true
       end
     end
 
     def install_helm_deps
       return if revoke?
       @helm.update_deps
-      say "👏  Seatrain base Helm chart downloaded"
+      prompt.ok "👏  Seatrain base Helm chart downloaded"
     end
 
     # Only called on `rails destroy seatrain:setup:helm`
     def remove_helm_folder
       return if invoke?
-      if ask "Remove `.seatrain/helm` folder and all its contents entirely? (y/n)"
+      if prompt.ask "Remove `.seatrain/helm` folder and all its contents entirely?"
         FileUtils.rm_rf(Rails.root.join(".seatrain", "helm"))
       end
     end
 
     private
+
+    def prompt
+      @prompt ||= TTY::Prompt.new
+    end
 
     def method_missing(method, *args, &block)
       if method.to_s.start_with?("seatrain")

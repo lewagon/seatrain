@@ -23,8 +23,6 @@ x-template-app: &template-app
     - packs:/app/public/packs
     - packs-test:/app/public/packs-test
     - .seatrain/.pryrc:/root/.pryrc:ro
-    # TODO: REMOVE BEFORE RELEASE!
-    - ~/code/lewagon/seatrain:/root/code/lewagon/seatrain
   environment:
     - NODE_ENV=development
     - RAILS_ENV=${RAILS_ENV:-development}

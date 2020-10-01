@@ -43,23 +43,6 @@ module Seatrain
       out.tr("'", "") # otherwise IP addr is single-quoted
     end
 
-    # TODO: Cleanup, use more generic method below
-    def namespace_exists?(name)
-      ok, out = shell(
-        "kubectl",
-        "get",
-        "namespace",
-        name
-      )
-      unless ok
-        return false if out.match?(/NotFound/)
-        puts "Could not get namespace in the cluster, reason:"
-        puts out
-        exit 1
-      end
-      out.match?(/#{name}/)
-    end
-
     def resource_exists?(type, name)
       ok, out = shell(
         "kubectl",
@@ -125,8 +108,8 @@ module Seatrain
         "secret",
         "docker-registry",
         "#{Seatrain.config.app_name}-pull-secret",
-        "--docker-server=#{Seatrain.config.docker_server}",
-        "--docker-username=#{Seatrain.config.docker_login}",
+        "--docker-server=#{Seatrain.config.docker_registry}",
+        "--docker-username=#{Seatrain.config.docker_username}",
         "--docker-password=#{Seatrain.config.docker_password}"
       )
       unless ok

@@ -114,8 +114,8 @@ module Seatrain
         "--short"
       )
       unless ok
-        # TODO: rephrase!
-        puts "`helm list` command failed, investigate"
+        puts "`helm list` failed, reason: "
+        puts out
         exit 1
       end
 

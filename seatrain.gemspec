@@ -12,8 +12,6 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
-  # spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
-
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/lewagon/seatrain"
   spec.metadata["changelog_uri"] = "https://github.com/lewagon/seatrain/CHANGELOG"
@@ -30,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "hashie", "~> 4.1"
   spec.add_dependency "dip", "~> 6.1"
   spec.add_dependency "anyway_config", ">= 2.0.0"
+  spec.add_dependency "tty-prompt", "~> 0.22"
 end

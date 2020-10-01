@@ -4,13 +4,13 @@ module Seatrain
     source_root File.expand_path("templates", __dir__)
 
     def welcome
-      say "🚃 SEATRAIN GHA #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      prompt.say "🚃 SEATRAIN GITHUB ACTIONS DEPLOY #{invoke? ? "SETUP" : "CLEANUP"} 🌊"
     end
 
     def check_seatrain_yml
       return if revoke?
       unless File.exist?("config/seatrain.yml")
-        say "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`", :red
+        prompt.warn "Run `rails generate seatrain:install` first and edit the resulting `config/seatrain.yml`", :red
         exit 0
       end
     end
@@ -23,10 +23,20 @@ module Seatrain
 
     # TODO:
     def print_instructions
-      puts "You need to set the following secrets in your GitHub repository: "
+      promt.warn "⚠️  You need to set the following secrets in your GitHub repository: "
+      prompt.warn "👉  DOCKER_USERNAME" unless Seatrain.config.uses_docr? || Seatrain.config.docker_username.empty?
+      prompt.warn "👉  DOCKER_PASSWORD" unless Seatrain.config.uses_docr?
+      prompt.warn "👉  RAILS_MASTER_KEY"
+      Seatrain.config.required_secrets.each do |name|
+        prompt.warn "👉  #{name.upcase}"
+      end
     end
 
     private
+
+    def prompt
+      @prompt ||= TTY::Prompt.new
+    end
 
     def generate_upgrade_string
       Seatrain::Helm.new.safe_upgrade_command_string

@@ -14,13 +14,12 @@ module Seatrain
       :yarn_version,
       :bundler_version,
       :app_name,
-      :development_image_name,
       :production_image_name,
-      :docker_server,
-      :docker_login,
+      :docker_registry,
+      :docker_username,
       :docker_password,
+      :docker_repository,
       :do_cluster_name,
-      :do_container_registry_name,
       :hostname,
       :certificate_email,
       use_sidekiq: true,
@@ -33,7 +32,7 @@ module Seatrain
     )
 
     def uses_docr?
-      docker_server == DOCR_URL
+      docker_registry == DOCR_URL
     end
 
     def app_name
