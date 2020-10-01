@@ -53,7 +53,7 @@ namespace :seatrain do
       Rake::Task["seatrain:release:push"].invoke
 
       if Seatrain.config.uses_docr?
-        Rake::Task["seatrain:release:create_pull_secret_docr"]
+        Rake::Task["seatrain:release:create_pull_secret_docr"].invoke
       else
         secret_name = "#{Seatrain.config.app_name}-pull-secret"
         unless Seatrain::Kubectl.new.resource_exists?(:secret, secret_name)
