@@ -10,7 +10,7 @@ module Seatrain
     namespace "seatrain:cluster:prepare"
 
     def welcome
-      prompt.ok "🚃 SEATRAIN CLUSTER PREPARATION 🌊"
+      prompt.say "🚃 SEATRAIN CLUSTER PREPARATION 🌊"
 
       prompt.warn "⚠️  helm and kubectl executables need to be installed and available in $PATH for generator to continue"
     end

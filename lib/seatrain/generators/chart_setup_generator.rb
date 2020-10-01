@@ -4,7 +4,7 @@ module Seatrain
     source_root File.expand_path("templates", __dir__)
 
     def welcome
-      prompt.say "🚃 SEATRAIN HELM #{invoke? ? "SETUP" : "CLEANUP"} 🌊", :green
+      prompt.say "🚃 SEATRAIN HELM #{invoke? ? "SETUP" : "CLEANUP"} 🌊"
     end
 
     def check_tools
