@@ -31,16 +31,15 @@ module Seatrain
     def warn_overwrite
       return if revoke?
       existing = FILES_TO_FORCE.select { |file| File.exist?(file) }
-      if existing.present?
-        prompt.warn <<~TXT
-          ⚠️  These files will be overwritten based on new settings in `config/seatrain.yml`:
+      return if existing.empty?
 
-          #{existing.map { |file| "👉  #{file}" }.join("\n")}
+      prompt.warn <<~TXT
+        ⚠️  These files will be overwritten based on new settings in `config/seatrain.yml`:
 
-          If you modified the default boilerplate in those files, make sure to back up your work (e.g., make a git commit)
-        TXT
-      end
+        #{existing.map { |file| "👉  #{file}" }.join("\n")}
 
+        If you modified the default boilerplate in those files, make sure to back up your work (e.g., make a git commit)
+      TXT
       unless prompt.yes?("Overwrite files?")
         prompt.ok("No worries. Re-run this generator once ready.")
         exit 0

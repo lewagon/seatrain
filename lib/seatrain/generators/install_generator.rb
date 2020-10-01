@@ -9,13 +9,12 @@ module Seatrain
 
     def warn_overwrite
       return if revoke?
-      if File.exist?("config/seatrain.yml")
-        prompt.warn <<~TXT
-          ⚠️  Your `config/setrain.yml` will be overwritten.
+      return unless File.exist?("config/seatrain.yml")
+      prompt.warn <<~TXT
+        ⚠️  Your `config/setrain.yml` will be overwritten.
 
-          If you modified this file manually, make sure to back up your work (e.g., make a git commit)
-        TXT
-      end
+        If you modified this file manually, make sure to back up your work (e.g., make a git commit)
+      TXT
 
       unless prompt.yes?("Overwrite config/seatrain.yml?")
         prompt.ok("No worries. Re-run this generator once ready.")
