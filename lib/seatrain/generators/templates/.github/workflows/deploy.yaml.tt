@@ -63,7 +63,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Save DigitalOcean kubeconfig
-        run: doctl kubernetes cluster kubeconfig show seatrain-demo > $GITHUB_WORKSPACE/.kubeconfig
+        run: doctl kubernetes cluster kubeconfig show <%= seatrain_do_cluster_name %> > $GITHUB_WORKSPACE/.kubeconfig
 
       - name: Deploy to cluster
         run: >

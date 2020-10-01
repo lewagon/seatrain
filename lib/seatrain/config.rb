@@ -17,6 +17,7 @@ module Seatrain
       :docker_server,
       :docker_login,
       :docker_password,
+      :do_cluster_name,
       :hostname,
       :certificate_email,
       use_sidekiq: true,
