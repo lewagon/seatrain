@@ -18,9 +18,9 @@ module Seatrain
         "kubectl",
         "patch",
         "services",
-        "nginx-ingress-nginx-ingress",
+        "nginx-ingress-ingress-nginx-controller",
         "--namespace",
-        "nginx-ingress",
+        "ingress-nginx",
         "-p",
         '{"spec":{"externalTrafficPolicy":"Cluster"}}'
       )
@@ -36,27 +36,42 @@ module Seatrain
         "kubectl",
         "get",
         "service",
-        "--namespace=nginx-ingress",
-        "nginx-ingress-nginx-ingress",
+        "--namespace=ingress-nginx",
+        "nginx-ingress-ingress-nginx-controller",
         "--template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'"
       )
       out.tr("'", "") # otherwise IP addr is single-quoted
     end
 
-    def namespace_exists?(name)
+    def resource_exists?(type, name)
       ok, out = shell(
         "kubectl",
         "get",
-        "namespace",
+        type.to_s,
         name
       )
       unless ok
         return false if out.match?(/NotFound/)
-        puts "Could not get namespace in the cluster, reason:"
+        puts "Could not get #{type} in the cluster, reason:"
         puts out
         exit 1
       end
       out.match?(/#{name}/)
+    end
+
+    def delete_resource(type, selector)
+      ok, out = shell(
+        "kubectl",
+        "delete",
+        type.to_s,
+        "--selector",
+        selector
+      )
+      unless ok
+        puts "Could not delete pods, reason:"
+        puts out
+        exit 1
+      end
     end
 
     def create_namespace(name)
@@ -84,6 +99,24 @@ module Seatrain
         exit 1
       end
       out
+    end
+
+    def create_pull_secret(server, login, password)
+      ok, out = shell(
+        "kubectl",
+        "create",
+        "secret",
+        "docker-registry",
+        "#{Seatrain.config.app_name}-pull-secret",
+        "--docker-server=#{Seatrain.config.docker_registry}",
+        "--docker-username=#{Seatrain.config.docker_username}",
+        "--docker-password=#{Seatrain.config.docker_password}"
+      )
+      unless ok
+        puts "Could not create pull secret in a cluster, reason:"
+        puts out
+        exit 1
+      end
     end
 
     private

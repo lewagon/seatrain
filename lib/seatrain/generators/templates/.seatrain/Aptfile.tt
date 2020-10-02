@@ -1,0 +1,3 @@
+<% seatrain_with_apt_packages.each do |package| %>
+<%= package -%>
+<% end %>
