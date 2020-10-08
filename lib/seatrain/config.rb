@@ -36,7 +36,7 @@ module Seatrain
     end
 
     def app_name
-      super || Rails.application.class.module_parent_name.titleize.parameterize
+      super || Rails.root.to_s.split("/").last
     end
   end
 end
