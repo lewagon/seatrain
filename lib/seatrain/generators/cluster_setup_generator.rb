@@ -4,7 +4,7 @@ require_relative "../kubectl"
 
 module Seatrain
   class ClusterSetupGenerator < Rails::Generators::Base
-    NGINX_RETRIES = 18
+    NGINX_RETRIES = 30
     NGINX_RETRY_INTERVAL = 30
 
     namespace "seatrain:cluster:prepare"
@@ -80,7 +80,7 @@ module Seatrain
       if success
         prompt.say "[KUBECTL]  🎉  Load balancer created, public IP: #{ip}"
       else
-        propmt.error "[KUBECTL] Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard"
+        prompt.error "[KUBECTL] Failed to create LoadBalancer in #{NGINX_RETRIES} attempts, check Digital Ocean dashboard"
       end
     end
 
