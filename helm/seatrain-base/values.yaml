@@ -39,7 +39,8 @@ global:
   db:
     prepareJob:
       enabled: true
-      command: "rails db:create db:migrate"
+      command: "rails db:migrate"
+      deadlineSeconds: 180
 
   service:
     type: ClusterIP

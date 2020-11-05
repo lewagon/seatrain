@@ -42,7 +42,7 @@ global:
 <% if Rails::VERSION::MAJOR >= 6 -%>
       command: "rails db:prepare"
 <% else -%>
-      command: "rails db:create db:migrate"
+      command: "rails db:migrate"
 <% end -%>
 
   https:
@@ -54,9 +54,16 @@ global:
       - host: <%= seatrain_hostname %>
 
 redis:
+  configmap: |-
+    # Enable AOF https://redis.io/topics/persistence#append-only-file
+    appendonly yes
+    # Disable RDB persistence, AOF persistence already enabled.
+    save ""
+    maxmemory 100Mb
+    maxmemory-policy allkeys-lfu
   cluster:
     enabled: false
-    slaveCount: 2
+    slaveCount: 1
   usePassword: false
   # By default, FLUSH and FLUSHALL are disabled in bitnami/redis chart
   master:

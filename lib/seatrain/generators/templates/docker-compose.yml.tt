@@ -2,8 +2,8 @@ version: "3.4"
 
 x-template-app: &template-app
   build:
-    context: ".seatrain"
-    dockerfile: "Dockerfile.dev"
+    context: "."
+    dockerfile: ".seatrain/Dockerfile.dev"
     args:
       RUBY_VERSION: <%= seatrain_ruby_version %>
       PG_MAJOR: <%= seatrain_pg_major_version %>

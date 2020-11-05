@@ -13,6 +13,7 @@ module Seatrain
     end
 
     # Digital Ocean specific
+    # Apparently not required anymore.
     def patch_do_load_balancer
       ok, out = shell(
         "kubectl",

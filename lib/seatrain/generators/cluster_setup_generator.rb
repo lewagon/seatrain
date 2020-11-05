@@ -84,13 +84,6 @@ module Seatrain
       end
     end
 
-    # Patch nginx-ingress service in Digital Ocean
-    def patch_do_load_balancer
-      prompt.say "[KUBECTL] Patching externalTrafficPolicy from Local to Cluster"
-      @kubectl.patch_do_load_balancer
-      prompt.say "[KUBECTL] 🎉  Success!"
-    end
-
     def install_certmanager
       return if revoke?
       name = namespace = "cert-manager"
