@@ -3,12 +3,12 @@ entries:
   seatrain-base:
   - apiVersion: v2
     appVersion: "1"
-    created: "2020-11-05T11:08:32.428796+01:00"
+    created: "2020-11-26T09:05:10.690291+01:00"
     description: Subchart with common resources for a standard Rails deployment
-    digest: 26f90adea479905c558123ac28d329a90e9297c73d9486b40d2c0fa176aa891f
+    digest: aeaf315ef04f7df85c3b3e1d7e07f079f01a5a20dbe05d3d9ea827d9a49c8f63
     name: seatrain-base
     type: application
     urls:
     - https://lewagon.github.io/seatrain/seatrain-base-0.1.0.tgz
     version: 0.1.0
-generated: "2020-11-05T11:08:32.427643+01:00"
+generated: "2020-11-26T09:05:10.687654+01:00"

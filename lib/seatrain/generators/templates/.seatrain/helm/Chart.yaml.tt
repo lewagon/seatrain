@@ -7,8 +7,8 @@ appVersion: 1.0
 
 dependencies:
   - name: redis
-    version: 10.2.1
-    repository: "@stable"
+    version: 11.1.0
+    repository: https://charts.bitnami.com/bitnami
   - name: seatrain-base
     version: 0.1.0
     repository: "https://lewagon.github.io/seatrain/"

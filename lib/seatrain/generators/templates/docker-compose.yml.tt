@@ -33,6 +33,7 @@ x-template-app: &template-app
     - WEB_CONCURRENCY=1
     - HISTFILE=/app/log/.pry_history
     - EDITOR=vi
+    - VNC_SERVER_PASSWORD=secret
 
 services:
   app:
