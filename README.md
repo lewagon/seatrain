@@ -30,7 +30,7 @@ Note that you only need `seatrain` under development group, it does not belong i
 
 Run `rails g seatrain:install`.
 
-![Interactive CLI wizard](media/seatrain_install.h264.mp4)
+![Interactive CLI wizard]()
 
 #### :warning: Known issues
 
@@ -40,9 +40,23 @@ VIDEO
 
 ## Step 1. Local development environment with Docker Compose and Dip
 
-Run `rails g seatrain:docker` to generate the following files
+Run `rails g seatrain:docker`. Here's the output with a list of created files:
 
-![Docker setup generator](media/docker_generator.png)
+```sh
+🚃 SEATRAIN DOCKER SETUP 🌊
+create  .seatrain/Aptfile
+create  docker-compose.yml
+create  dip.yml
+create  .seatrain/Dockerfile.dev
+create  .seatrain/Dockerfile.prod
+create  .seatrain/.pryrc
+create  .seatrain/vnc.sh
+insert  config/database.yml
+👌 `url: <%= ENV.fetch("DATABASE_URL", " ") %>` injected into config/database.yml
+
+All set, you can run your app in containers locally now! 📦
+Run `dip provision` to start
+```
 
 #### :warning: Known issues
 
