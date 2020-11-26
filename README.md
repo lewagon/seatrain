@@ -1,10 +1,10 @@
 # Seatrain
 
-Rails + Docker + Digital Ocean Kubernetes + GitHub Actions = :heart:
+> Rails + Docker + Digital Ocean Kubernetes + GitHub Actions = :heart:
 
-Developer-friendly DevOps/GitOps boilerplate generator for Rails applications that puts local and production configuration into the repository to make deploying and collaborating on live application as straightforward as possible. Supports Rails 5+, Sidekiq, Webpacker, PosgtreSQL, and Redis.
+**Developer-friendly DevOps/GitOps boilerplate generator for Rails applications that puts local and production configuration into the repository to make deploying and collaborating on live application as straightforward as possible. Supports Rails 5+, Sidekiq, Webpacker, PosgtreSQL, and Redis.**
 
-Seatrain is a collection of Rails generators and tasks that allow you to:
+Seatrain is a collection of _Rails generators_ and tasks that allow you to:
 
 - Set up containerized development environment with Docker Compose and [Dip](https://github.com/bibendi/dip) that also supports system testing with containerized Chrome and VNC.
 - Set up [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io) in your cluster for automatic load balancing and SSL.
