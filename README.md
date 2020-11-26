@@ -2,22 +2,24 @@
 
 > Rails + Docker + Digital Ocean Kubernetes + Helm + GitHub Actions = :heart:
 
-**Developer-friendly DevOps/GitOps boilerplate generator for Rails applications that puts local and production configuration into the repository to make deploying and collaborating on live application as straightforward as possible. Supports Rails 5+, Sidekiq, Webpacker, PosgtreSQL, and Redis.**
+**Developer-friendly DevOps/GitOps boilerplate generator for containreizing Rails applications for development and production. Aware of Rails 5+, Sidekiq, Webpacker, PosgtreSQL, and Redis.**
 
 Seatrain is a collection of _Rails generators_ and tasks that allow you to:
 
-- Set up containerized development environment with Docker Compose and [Dip](https://github.com/bibendi/dip) that also supports system testing with containerized Chrome and VNC. The environment largely borrows from the popular [Ruby on Whales](https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development) setup by @palkan from Evil Martians.
-- Set up [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io) in your cluster for automatic load balancing and SSL.
+- Set up containerized development environment with Docker Compose and [Dip](https://github.com/bibendi/dip) that also supports system testing with containerized Chrome and VNC. The environment largely borrows from the popular [Ruby on Whales](https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development) setup by [Vladimir Dementyev](https://github.com/palkan/) from Evil Martians.
+- Set up [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io) in your cluster for load balancing and SSL. This step will also assign a static IP for your cluster that you can use in DNS records.
 - Choose between Digital Ocean Container Registry, Quay.io, Docker Hub, or GitHub Container Registry for storing your images. Other providers can be easily supported by manually editing generated files.
 - Generate a Helm chart for deploying Rails charts into the cluster with a single command.
 - Generate a GitHub Action for continuous deployment into the cluster on `git push` or PR merge that takes advantage of Docker layer caching for faster deploys.
 
-Created at [Le Wagon](https://www.lewagon.com), the best-rated coding bootcamp, to power internal and public-facing learning platforms. Partly powered by [Evil Martians OSS](https://evilmartians.com/#oss).
+In the end, the developer experience is not that different from the one provided by Heroku. Merging a PR, or pushing to master will deploy a new release into a production cluster. However, you keep the ultimate control over the whole deployment stack.
+
+Created at [Le Wagon](https://www.lewagon.com), the top-rated coding bootcamp, to power internal and public-facing learning platforms. Partly powered by [Evil Martians OSS](https://evilmartians.com/#oss).
 
 ## Table of Contents
 
-- Installation
-- Seatrain config
+- [Installation](#installation)
+- [Seatrain configuration](#seatrain-configuration)
 - Local development environment with Docker Compose and Dip
 - Handling secret values
 
@@ -33,7 +35,11 @@ end
 
 Note that you only need `seatrain` under development group, it does not belong in `test` group or main section of your Gemfile.
 
-## Seatrain config.
+#### Disclaimer :star:
+
+This is an _alpha, pre-release_ version of the gem. Anything can change without prior notice, but as the primary purpose of the project is to provide a _sensible default generator for containerized Rails development and production environments_, changes should not affect setups that are already generated. After enough feedback is gathered from the real-world projects outside Le Wagon applications, some decisions can be set in stone. We have a list of issues to tackle that require primarily not the programming (there is nothing complex about template and generator) input, but the developer experience input to see whether some defaults make or break workflows that you know and use.
+
+## Seatrain configuration
 
 Run `rails g seatrain:install`.
 
@@ -42,7 +48,7 @@ Run `rails g seatrain:install`.
 It creates a file `config/seatrain.yml` that contains settings that further generators and tasks will rely upon. Feel free to modify it by hand, if necessary:
 
 - Add more APT packages that your application runtime might need by adding their names to `with_apt_packages` key.
-- Seatrain flow assumes that most of the credentials that you'd like to keep secret will be handled by `rails credentials` mechanism. However, it is not wise to keep **really critical credentials**
+- Seatrain flow assumes that most of the credentials that you'd like to keep secret will be handled by `rails credentials` mechanism. However, it is not wise to keep **critical credentials**, like a database connection string, inside the application code even if it's encrypted (not everyone on the project with a `master.key` should have direct access to the production database). By default, `seatrain.yml` will assume that `DATABASE_URL` is never commited to git in any shape or form, so you will be prompted that value interactively upon _manual_ deploy. Upon the CI deploy, a GitHub Action will look for a secret with the same name inside the [encrypted secrets](https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository) set up in the GitHub repository. Read more in "Handling secret values" section.
 
 ```yml
 # Set versions for Ruby, Postgres, Node, Yarn and Bundler
@@ -95,15 +101,22 @@ required_secrets:
 
 #### :warning: Known issues
 
-- The possible `.ruby-version` in the root and/or `ruby 'x.x.x'` statement in `Gemfile` (Heroku specific) need to match the Ruby version chosen in the CLI wizard.
+- The possible `.ruby-version` in the root and/or `ruby 'x.x.x'` statement in `Gemfile` (Heroku specific) need to match the Ruby version chosen in the CLI wizard. (https://github.com/lewagon/seatrain/issues/4)
+- The `webconsole` will not be displayed by default on Rails error pages in development, as the IP of a Docker host is different from `localhost`. Currently, the way to work around it is to add
+
+```
+config.web_console.permissions = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+```
+
+into the `development.rb`. That could be automated too (https://github.com/lewagon/seatrain/issues/3)
 
 ## Local development environment with Docker Compose and Dip
 
-Run `rails g seatrain:docker`. Here's the output with a list of created files:
+Run `rails g seatrain:docker`. Here's the expected output:
 
 ```
 🚃 SEATRAIN DOCKER SETUP 🌊
-create  .seatrain/Aptfile ##
+create  .seatrain/Aptfile
 create  docker-compose.yml
 create  dip.yml
 create  .seatrain/Dockerfile.dev
@@ -120,6 +133,8 @@ Run `dip provision` to start
 #### :warning: Known issues
 
 - Sprockets need to be downgraded to 3.7.4 to avoid `sassc` segfault in a Debian container. (https://github.com/lewagon/seatrain/issues/2)
+
+##
 
 ## License
 
