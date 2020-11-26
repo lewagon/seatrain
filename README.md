@@ -37,12 +37,12 @@ Note that you only need `seatrain` under development group, it does not belong i
 
 Run `rails g seatrain:install`.
 
-![Interactive CLI wizard]()
+![Interactive CLI wizard](media/install.gif)
 
 It creates a file `config/seatrain.yml` that contains settings that further generators and tasks will rely upon. Feel free to modify it by hand, if necessary:
 
 - Add more APT packages that your application runtime might need by adding their names to `with_apt_packages` key.
-- Look at
+- Seatrain flow assumes that most of the credentials that you'd like to keep secret will be handled by `rails credentials` mechanism. However, it is not wise to keep **really critical credentials**
 
 ```yml
 # Set versions for Ruby, Postgres, Node, Yarn and Bundler
