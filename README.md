@@ -2,7 +2,7 @@
 
 > Rails + Docker + Digital Ocean Kubernetes + Helm + GitHub Actions = :heart:
 
-**Developer-friendly DevOps/GitOps boilerplate generator for containreizing Rails applications for development and production. Aware of Rails 5+, Sidekiq, Webpacker, PosgtreSQL, and Redis.**
+**Developer-friendly, GitOps-focused boilerplate generator for containerizing Rails applications. Takes care of _both_ local development environment and production container orchestration, relying on GitHub repository as the single source of truth. Caters to standard stack: Rails 5+, Sidekiq, Webpacker, PosgtreSQL, and Redis.**
 
 Seatrain is a collection of _Rails generators_ and tasks that allow you to:
 
