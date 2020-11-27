@@ -130,10 +130,6 @@ All set, you can run your app in containers locally now! 📦
 Run `dip provision` to start
 ```
 
-#### :warning: Known issues
-
-- Sprockets need to be downgraded to 3.7.4 to avoid `sassc` segfault in a Debian container. (https://github.com/lewagon/seatrain/issues/2)
-
 ## Docker Compose and [Dip](https://github.com/bibendi/dip)
 
 Dip (short for _Docker Interaction Process_) is a Ruby gem from Misha Merkushin at Evil Martians that allows you to interact with development containers as if you were using Rails without Docker at all.
@@ -141,17 +137,69 @@ Dip (short for _Docker Interaction Process_) is a Ruby gem from Misha Merkushin 
 Compare:
 
 ```
-# No dip
+# No dip 👎
 docker-compose run rails rails c # verbose and confusing
 ```
 
 ```
-# With dip
+# With dip 👍
 dip rails c
+```
 
+You can check which commands Dip makes available for you by typing `dip ls`:
 
+```
+bash             # Open the Bash shell in rails container
+bundle           # Run Bundler commands
+yarn             # Run Yarn commands
+rails            # Run Rails commands
+rails s          # Run Rails server at http://localhost:3000
+rails s-altport  # Run Rails server at select port `dip run -p 5000:3000 rails s-altport`
+rails logs       # Display last 200 lines of Rails logs and follow
+rake             # Run Rake commands
+rspec            # Run Rspec commands
+sidekiq          # Run commands in sidekiq container
+sidekiq logs     # Display last 200 lines of Sidekiq logs and follow
+webpacker        # Run commands towards Webpacker service
+webpacker logs   # Display last 200 lines of Webpacker logs and follow
+psql             # Run Postgres psql console
+redis-cli        # Run Redis CLI
+```
+
+For the initial setup of local containers, run `dip provision` in your Terminal from the project root.
+
+```
+pwd # => my_project_folder
+dip provision
+# wait 10 minutes while environment is being created
+```
+
+This will build images for all the services in generated `docker-compose`, set up volumes (by first removing any pre-existing values), install Ruby and JS dependencies, and drop-create-migrate development database (inside the dedicated volume).
+
+> :warning: You don't have to run `dip provision` every time you return to the project. Think of this command as "set things up for me initially" or "I give up, nuke my whole environment and create again"
+
+After provisioning the environment, you can use **every command** from your non-Docker workflow by prepending it with `dip`. E.g.:
+
+- `dip webpacker` to run `webpack-dev-server` in a separate Terminal tab to compile your JS assets on the fly.
+- `dip rails s` in another Terminal tab to run a Rails server as a separate `docker run` process. The upside of this approach is that you get to use tools like `binding.pry` naturally, without having to `docker attach`. If the `dip webpacker` is not running prior to that — Webpack compilation will happen in the main server thread.
+- `dip sidekiq` as yet another Terminal process to process background jobs.
+- `dip bundle ...` to manage Ruby dependencies.
+- `dip yarn ...` to manage Node dependencies.
+
+#### Why not `dip up`?
+
+As `dip` is just a wrapper around `docker-compose`, you can achieve the `docker-compose up -d` style of development by starting all the services defined in `docker-compose.yml` _at the same time_ with `dip up -d`. However, in our opinion this is not the best pratice for heavy local development, as it does not provide easy access to service logs or `binding.pry` debugging.
+
+If, however, you are used to `up` approach, you can start all your services with `dip up -d` and attach to logs by `dip rails logs`, `dip webpacker logs`, or `dip sidekiq logs`. To attach to `binding.pry` you will have to run `docker attach with a name of the running container` (look it up in `docker ps`).
+
+#### :warning: Known issues
+
+- Sprockets needs to be downgraded to 3.7.4 to avoid `sassc` segfault in a Debian container. (https://github.com/lewagon/seatrain/issues/2)
+- EventedFileChecker
+- poll: true
+- Busting caches
+- yarn_integrity
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-```
