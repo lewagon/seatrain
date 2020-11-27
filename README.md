@@ -33,13 +33,15 @@ group :development do
 end
 ```
 
+Then run `bundle install`.
+
 Note that you only need `seatrain` under development group, it does not belong in `test` group or main section of your Gemfile.
 
 #### Disclaimer :star:
 
 This is an _alpha, pre-release_ version of the gem. Anything can change without prior notice, but as the primary purpose of the project is to provide a _sensible default generator for containerized Rails development and production environments_, changes should not affect setups that are already generated.
 
-## Seatrain configuration
+## Getting started
 
 Run `rails g seatrain:install`.
 
@@ -110,7 +112,7 @@ config.web_console.permissions = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16
 
 into the `development.rb`. That could be automated too (https://github.com/lewagon/seatrain/issues/3)
 
-## Local development environment config generator
+## Generate local development environment
 
 Run `rails g seatrain:docker`. Here's the expected output:
 
@@ -174,7 +176,7 @@ dip provision
 # wait 10 minutes while environment is being created
 ```
 
-This will build images for all the services in generated `docker-compose`, set up volumes (by first removing any pre-existing values), install Ruby and JS dependencies, and drop-create-migrate development database (inside the dedicated volume).
+This will build images for all the services in generated `docker-compose`, set up volumes (by first removing any pre-existing ones), install Ruby and JS dependencies, and drop-create-migrate development database (inside the dedicated volume).
 
 > :warning: You don't have to run `dip provision` every time you return to the project. Think of this command as "set things up for me initially" or "I give up, nuke my whole environment and create again"
 
@@ -183,8 +185,8 @@ After provisioning the environment, you can use **every command** from your non-
 - `dip webpacker` to run `webpack-dev-server` in a separate Terminal tab to compile your JS assets on the fly.
 - `dip rails s` in another Terminal tab to run a Rails server as a separate `docker run` process. The upside of this approach is that you get to use tools like `binding.pry` naturally, without having to `docker attach`. If the `dip webpacker` is not running prior to that — Webpack compilation will happen in the main server thread.
 - `dip sidekiq` as yet another Terminal process to process background jobs.
-- `dip bundle ...` to manage Ruby dependencies.
-- `dip yarn ...` to manage Node dependencies.
+- `dip bundle install` when adding/removing a gem.
+- `dip yarn install` when adding another Node dependency.
 
 #### Why not `dip up`?
 
