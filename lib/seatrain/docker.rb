@@ -32,6 +32,7 @@ module Seatrain
         "YARN_VERSION=#{Seatrain.config.yarn_version}",
         "--build-arg",
         "BUNDLER_VERSION=#{Seatrain.config.bundler_version}",
+        "--progress=plain",
         {chdir: Rails.root.to_s}
       )
       unless ok
